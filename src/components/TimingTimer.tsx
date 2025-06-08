@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -61,24 +62,24 @@ const TimingTimer = () => {
 
   const canTakeCobenfy = () => {
     if (!lastMeal) return true;
-    const safeTime = new Date(lastMeal.getTime() + 2 * 60 * 60 * 1000);
+    const safeTime = new Date(lastMeal.getTime() + 2 * 60 * 60 * 1000); // 2 hours after eating
     return currentTime >= safeTime;
   };
 
   const canEat = () => {
     if (!lastCobenfy) return true;
-    const safeTime = new Date(lastCobenfy.getTime() + 2 * 60 * 60 * 1000);
+    const safeTime = new Date(lastCobenfy.getTime() + 1 * 60 * 60 * 1000); // 1 hour after Cobenfy
     return currentTime >= safeTime;
   };
 
   const getSafeCobenFyTime = () => {
     if (!lastMeal) return null;
-    return new Date(lastMeal.getTime() + 2 * 60 * 60 * 1000);
+    return new Date(lastMeal.getTime() + 2 * 60 * 60 * 1000); // 2 hours after eating
   };
 
   const getSafeEatTime = () => {
     if (!lastCobenfy) return null;
-    return new Date(lastCobenfy.getTime() + 2 * 60 * 60 * 1000);
+    return new Date(lastCobenfy.getTime() + 1 * 60 * 60 * 1000); // 1 hour after Cobenfy
   };
 
   const renderMainContent = () => {
@@ -91,14 +92,14 @@ const TimingTimer = () => {
           <div className="flex gap-3 justify-center">
             <Button 
               onClick={handleAte} 
-              className="bg-white text-hot-pink font-bold hover:bg-gray-100 border border-hot-pink flex items-center gap-2"
+              className="bg-white !text-hot-pink font-bold hover:bg-gray-100 border border-hot-pink flex items-center gap-2"
             >
               <Utensils size={18} />
               I just ate
             </Button>
             <Button 
               onClick={handleTookCobenfy} 
-              className="bg-white text-hot-pink font-bold hover:bg-gray-100 border border-hot-pink flex items-center gap-2"
+              className="bg-white !text-hot-pink font-bold hover:bg-gray-100 border border-hot-pink flex items-center gap-2"
             >
               <Pill size={18} />
               I took Cobenfy
@@ -153,7 +154,7 @@ const TimingTimer = () => {
               {isSafeToEat ? (
                 <div className="space-y-3">
                   <h3 className="text-xl font-semibold text-gold">🍽️ Safe to eat!</h3>
-                  <p className="text-sm text-muted-foreground">It's been 2+ hours since you took Cobenfy</p>
+                  <p className="text-sm text-muted-foreground">It's been 1+ hour since you took Cobenfy</p>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -172,14 +173,14 @@ const TimingTimer = () => {
         <div className="flex gap-3 justify-center">
           <Button 
             onClick={handleAte} 
-            className="bg-white text-hot-pink font-bold hover:bg-gray-100 border border-hot-pink flex items-center gap-2"
+            className="bg-white !text-hot-pink font-bold hover:bg-gray-100 border border-hot-pink flex items-center gap-2"
           >
             <Utensils size={18} />
             I just ate
           </Button>
           <Button 
             onClick={handleTookCobenfy} 
-            className="bg-white text-hot-pink font-bold hover:bg-gray-100 border border-hot-pink flex items-center gap-2"
+            className="bg-white !text-hot-pink font-bold hover:bg-gray-100 border border-hot-pink flex items-center gap-2"
           >
             <Pill size={18} />
             I took Cobenfy
@@ -191,7 +192,7 @@ const TimingTimer = () => {
             onClick={resetCycle} 
             variant="outline" 
             size="sm"
-            className="text-muted-foreground font-bold"
+            className="!text-muted-foreground font-bold"
           >
             Reset cycle
           </Button>
@@ -220,7 +221,7 @@ const TimingTimer = () => {
         <h3 className="font-semibold mb-2 text-center">Cobenfy Timing Guidelines</h3>
         <div className="text-sm text-muted-foreground text-center space-y-1">
           <p>🍽️ Eat → ⏰ Wait 2+ hours → 💊 Take Cobenfy</p>
-          <p>💊 Take Cobenfy → ⏰ Wait 2+ hours → 🍽️ Eat</p>
+          <p>💊 Take Cobenfy → ⏰ Wait 1+ hour → 🍽️ Eat</p>
         </div>
       </Card>
     </div>
