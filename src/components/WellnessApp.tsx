@@ -1,22 +1,62 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import MedicationTracker from './MedicationTracker';
 import DailyChecklist from './DailyChecklist';
 import SelfCareReminders from './SelfCareReminders';
 import TimingTimer from './TimingTimer';
 import EditMode from './EditMode';
-import { Bell, List, Heart, Calendar, Timer, Edit } from 'lucide-react';
+import { Bell, List, Heart, Calendar, Timer, Edit, Smartphone } from 'lucide-react';
+import { NotificationService } from '@/services/NotificationService';
+import { useToast } from '@/hooks/use-toast';
 
 const WellnessApp = () => {
   const [activeTab, setActiveTab] = useState('medications');
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const { toast } = useToast();
+
   const currentDate = new Date().toLocaleDateString('en-US', { 
     weekday: 'long', 
     year: 'numeric', 
     month: 'long', 
     day: 'numeric' 
   });
+
+  useEffect(() => {
+    // Check if notifications are already enabled
+    const notifEnabled = localStorage.getItem('notificationsEnabled');
+    if (notifEnabled === 'true') {
+      setNotificationsEnabled(true);
+    }
+  }, []);
+
+  const enableNotifications = async () => {
+    try {
+      const granted = await NotificationService.requestPermissions();
+      if (granted) {
+        await NotificationService.scheduleMedicationReminders();
+        setNotificationsEnabled(true);
+        localStorage.setItem('notificationsEnabled', 'true');
+        toast({
+          title: "Notifications enabled! 🔔",
+          description: "You'll receive medication reminders on your mobile device",
+        });
+      } else {
+        toast({
+          title: "Permission denied",
+          description: "Please enable notifications in your device settings to receive reminders",
+        });
+      }
+    } catch (error) {
+      console.error('Error enabling notifications:', error);
+      toast({
+        title: "Error",
+        description: "Unable to enable notifications. Please try again.",
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -30,6 +70,33 @@ const WellnessApp = () => {
               <Calendar size={16} />
               <span>{currentDate}</span>
             </div>
+            
+            {/* Mobile Notification Setup */}
+            {!notificationsEnabled && (
+              <div className="mt-4 p-3 bg-white/20 rounded-lg">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Smartphone size={16} />
+                  <span className="text-sm font-medium">Enable Mobile Notifications</span>
+                </div>
+                <Button 
+                  onClick={enableNotifications}
+                  className="bg-white text-black hover:bg-gray-100"
+                  size="sm"
+                >
+                  <Bell size={14} className="mr-1" />
+                  Set Up Reminders
+                </Button>
+              </div>
+            )}
+            
+            {notificationsEnabled && (
+              <div className="mt-4 p-2 bg-white/20 rounded-lg">
+                <div className="flex items-center justify-center gap-2 text-sm">
+                  <Bell size={14} />
+                  <span>Mobile notifications active ✓</span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
