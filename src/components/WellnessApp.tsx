@@ -5,7 +5,9 @@ import { Card } from '@/components/ui/card';
 import MedicationTracker from './MedicationTracker';
 import DailyChecklist from './DailyChecklist';
 import SelfCareReminders from './SelfCareReminders';
-import { Bell, List, Heart, Calendar } from 'lucide-react';
+import TimingTimer from './TimingTimer';
+import EditMode from './EditMode';
+import { Bell, List, Heart, Calendar, Timer, Edit } from 'lucide-react';
 
 const WellnessApp = () => {
   const [activeTab, setActiveTab] = useState('medications');
@@ -33,23 +35,35 @@ const WellnessApp = () => {
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8">
+          <TabsList className="grid w-full grid-cols-5 mb-8">
             <TabsTrigger value="medications" className="flex items-center gap-2">
               <Bell size={18} />
               <span className="hidden sm:inline">Medications</span>
             </TabsTrigger>
+            <TabsTrigger value="timer" className="flex items-center gap-2">
+              <Timer size={18} />
+              <span className="hidden sm:inline">Timer</span>
+            </TabsTrigger>
             <TabsTrigger value="checklist" className="flex items-center gap-2">
               <List size={18} />
-              <span className="hidden sm:inline">Daily Tasks</span>
+              <span className="hidden sm:inline">Tasks</span>
             </TabsTrigger>
             <TabsTrigger value="selfcare" className="flex items-center gap-2">
               <Heart size={18} />
               <span className="hidden sm:inline">Self-Care</span>
             </TabsTrigger>
+            <TabsTrigger value="edit" className="flex items-center gap-2">
+              <Edit size={18} />
+              <span className="hidden sm:inline">Edit</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="medications" className="animate-slide-in">
             <MedicationTracker />
+          </TabsContent>
+
+          <TabsContent value="timer" className="animate-slide-in">
+            <TimingTimer />
           </TabsContent>
 
           <TabsContent value="checklist" className="animate-slide-in">
@@ -59,12 +73,16 @@ const WellnessApp = () => {
           <TabsContent value="selfcare" className="animate-slide-in">
             <SelfCareReminders />
           </TabsContent>
+
+          <TabsContent value="edit" className="animate-slide-in">
+            <EditMode />
+          </TabsContent>
         </Tabs>
 
         {/* Footer */}
         <div className="mt-12 text-center">
           <Card className="medication-card calm-gradient">
-            <p className="text-sm text-gray-700">
+            <p className="text-sm text-gray-300">
               💙 Remember: You're doing great by taking care of your health. Every step forward matters.
             </p>
           </Card>

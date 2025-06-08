@@ -88,13 +88,6 @@ const MedicationTracker = () => {
     }
   };
 
-  const getButtonClass = (index: number, taken: boolean) => {
-    if (taken) {
-      return 'bg-accent text-accent-foreground cursor-not-allowed';
-    }
-    return index % 2 === 0 ? 'btn-gold' : 'btn-hot-pink';
-  };
-
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 mb-6">
@@ -117,7 +110,7 @@ const MedicationTracker = () => {
             <Button
               onClick={() => markAsTaken(med.id)}
               disabled={med.taken}
-              className={`ml-4 ${getButtonClass(index, med.taken)}`}
+              className={`ml-4 ${med.taken ? 'bg-gray-600 text-gray-300 cursor-not-allowed' : 'bg-white text-hot-pink hover:bg-gray-100 border border-hot-pink'}`}
             >
               {med.taken ? <Check size={18} /> : 'Take'}
             </Button>

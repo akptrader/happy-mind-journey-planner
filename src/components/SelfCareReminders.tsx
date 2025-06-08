@@ -112,13 +112,6 @@ const SelfCareReminders = () => {
     }
   };
 
-  const getButtonClass = (index: number, completed: boolean) => {
-    if (completed) {
-      return 'bg-accent text-accent-foreground cursor-not-allowed';
-    }
-    return index % 2 === 0 ? 'btn-gold' : 'btn-hot-pink';
-  };
-
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 mb-6">
@@ -150,7 +143,7 @@ const SelfCareReminders = () => {
               onClick={() => markCompleted(reminder.id)}
               disabled={reminder.completed}
               size="sm"
-              className={`ml-4 ${getButtonClass(index, reminder.completed)}`}
+              className={`ml-4 ${reminder.completed ? 'bg-gray-600 text-gray-300 cursor-not-allowed' : 'bg-white text-hot-pink hover:bg-gray-100 border border-hot-pink'}`}
             >
               {reminder.completed ? 'Done' : 'Complete'}
             </Button>
@@ -164,7 +157,7 @@ const SelfCareReminders = () => {
           <p className="text-sm text-muted-foreground mb-4">
             Motivation Hotline: <span className="font-mono font-bold">1-800-MOTIVATE</span>
           </p>
-          <Button className="btn-hot-pink">
+          <Button className="bg-white text-hot-pink hover:bg-gray-100 border border-hot-pink">
             Call Now
           </Button>
         </div>
