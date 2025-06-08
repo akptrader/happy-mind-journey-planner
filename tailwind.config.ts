@@ -53,15 +53,11 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				wellness: {
-					green: 'hsl(var(--wellness-green))',
-					blue: 'hsl(var(--wellness-blue))',
-					purple: 'hsl(var(--wellness-purple))',
-				},
-				calm: {
-					lavender: 'hsl(var(--calm-lavender))',
-					mint: 'hsl(var(--soft-mint))',
-					orange: 'hsl(var(--gentle-orange))',
+				'hot-pink': 'hsl(var(--hot-pink))',
+				champagne: {
+					DEFAULT: 'hsl(var(--champagne))',
+					light: 'hsl(var(--light-champagne))',
+					dark: 'hsl(var(--dark-champagne))',
 				}
 			},
 			borderRadius: {

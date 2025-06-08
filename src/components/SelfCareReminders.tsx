@@ -101,13 +101,13 @@ const SelfCareReminders = () => {
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'relaxation':
-        return 'border-l-calm-lavender bg-purple-50';
+        return 'border-l-hot-pink bg-pink-50';
       case 'motivation':
-        return 'border-l-wellness-blue bg-blue-50';
+        return 'border-l-foreground bg-gray-50';
       case 'mindfulness':
-        return 'border-l-calm-mint bg-green-50';
+        return 'border-l-champagne-dark bg-champagne-light';
       case 'movement':
-        return 'border-l-calm-orange bg-orange-50';
+        return 'border-l-champagne bg-champagne-light';
       default:
         return 'border-l-gray-300 bg-gray-50';
     }
@@ -116,7 +116,7 @@ const SelfCareReminders = () => {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 mb-6">
-        <Heart className="text-wellness-green" size={24} />
+        <Heart className="text-hot-pink" size={24} />
         <h2 className="text-2xl font-semibold text-foreground">Self-Care Reminders</h2>
       </div>
 
@@ -146,7 +146,7 @@ const SelfCareReminders = () => {
               size="sm"
               className={`ml-4 ${reminder.completed 
                 ? 'bg-accent text-accent-foreground cursor-not-allowed' 
-                : 'bg-wellness-green hover:bg-wellness-green/90'
+                : 'bg-hot-pink hover:bg-hot-pink/90 text-white'
               }`}
             >
               {reminder.completed ? 'Done' : 'Complete'}
@@ -155,13 +155,13 @@ const SelfCareReminders = () => {
         </Card>
       ))}
 
-      <Card className="medication-card border-l-4 border-l-wellness-blue bg-blue-50">
+      <Card className="medication-card border-l-4 border-l-hot-pink bg-pink-50">
         <div className="text-center">
           <h3 className="font-semibold mb-2">Need Support Right Now?</h3>
           <p className="text-sm text-muted-foreground mb-4">
             Motivation Hotline: <span className="font-mono font-bold">1-800-MOTIVATE</span>
           </p>
-          <Button className="bg-wellness-blue hover:bg-wellness-blue/90">
+          <Button className="bg-hot-pink hover:bg-hot-pink/90 text-white">
             Call Now
           </Button>
         </div>

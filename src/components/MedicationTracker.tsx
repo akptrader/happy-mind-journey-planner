@@ -78,11 +78,11 @@ const MedicationTracker = () => {
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'cobenfy':
-        return 'border-l-wellness-blue bg-blue-50';
+        return 'border-l-hot-pink bg-pink-50';
       case 'latuda':
-        return 'border-l-wellness-purple bg-purple-50';
+        return 'border-l-foreground bg-gray-50';
       case 'anti-nausea':
-        return 'border-l-wellness-green bg-green-50';
+        return 'border-l-champagne-dark bg-champagne-light';
       default:
         return 'border-l-gray-300 bg-gray-50';
     }
@@ -91,7 +91,7 @@ const MedicationTracker = () => {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 mb-6">
-        <Bell className="text-wellness-blue" size={24} />
+        <Bell className="text-hot-pink" size={24} />
         <h2 className="text-2xl font-semibold text-foreground">Today's Medications</h2>
       </div>
       

@@ -68,11 +68,11 @@ const DailyChecklist = () => {
   const getCategoryColor = (category: string) => {
     switch (category) {
       case 'medication':
-        return 'border-l-wellness-blue bg-blue-50';
+        return 'border-l-hot-pink bg-pink-50';
       case 'meals':
-        return 'border-l-calm-orange bg-orange-50';
+        return 'border-l-champagne-dark bg-champagne-light';
       case 'selfcare':
-        return 'border-l-wellness-green bg-green-50';
+        return 'border-l-foreground bg-gray-50';
       default:
         return 'border-l-gray-300 bg-gray-50';
     }
@@ -81,7 +81,7 @@ const DailyChecklist = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2 mb-6">
-        <List className="text-wellness-green" size={24} />
+        <List className="text-hot-pink" size={24} />
         <h2 className="text-2xl font-semibold text-foreground">Daily Checklist</h2>
       </div>
 
