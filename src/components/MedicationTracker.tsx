@@ -88,7 +88,7 @@ const MedicationTracker = () => {
     }
   };
 
-  const getButtonStyle = (index: number, taken: boolean) => {
+  const getButtonClass = (index: number, taken: boolean) => {
     if (taken) {
       return 'bg-accent text-accent-foreground cursor-not-allowed';
     }
@@ -117,7 +117,7 @@ const MedicationTracker = () => {
             <Button
               onClick={() => markAsTaken(med.id)}
               disabled={med.taken}
-              className={`ml-4 ${getButtonStyle(index, med.taken)}`}
+              className={`ml-4 ${getButtonClass(index, med.taken)}`}
             >
               {med.taken ? <Check size={18} /> : 'Take'}
             </Button>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -113,7 +112,7 @@ const SelfCareReminders = () => {
     }
   };
 
-  const getButtonStyle = (index: number, completed: boolean) => {
+  const getButtonClass = (index: number, completed: boolean) => {
     if (completed) {
       return 'bg-accent text-accent-foreground cursor-not-allowed';
     }
@@ -151,7 +150,7 @@ const SelfCareReminders = () => {
               onClick={() => markCompleted(reminder.id)}
               disabled={reminder.completed}
               size="sm"
-              className={`ml-4 ${getButtonStyle(index, reminder.completed)}`}
+              className={`ml-4 ${getButtonClass(index, reminder.completed)}`}
             >
               {reminder.completed ? 'Done' : 'Complete'}
             </Button>
