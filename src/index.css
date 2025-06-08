@@ -103,20 +103,22 @@
   }
 
   .btn-gold {
-    background: rgb(255 215 0);
-    color: rgb(0 0 0);
+    background: rgb(255 255 255);
+    color: rgb(236 72 153);
+    border: 1px solid rgb(236 72 153);
   }
 
   .btn-gold:hover {
-    background: rgb(255 215 0 / 0.9);
+    background: rgb(240 240 240);
   }
 
   .btn-hot-pink {
-    background: rgb(236 72 153);
-    color: rgb(255 255 255);
+    background: rgb(255 255 255);
+    color: rgb(236 72 153);
+    border: 1px solid rgb(236 72 153);
   }
 
   .btn-hot-pink:hover {
-    background: rgb(236 72 153 / 0.9);
+    background: rgb(240 240 240);
   }
 }
