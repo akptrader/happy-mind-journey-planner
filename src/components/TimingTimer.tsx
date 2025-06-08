@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -33,13 +32,25 @@ const TimingTimer = () => {
   const handleAte = () => {
     const now = new Date();
     setLastMeal(now);
-    setState('waiting-for-cobenfy');
+    // If we have no Cobenfy time or can already take Cobenfy, go to waiting for Cobenfy
+    if (!lastCobenfy || canTakeCobenfy()) {
+      setState('waiting-for-cobenfy');
+    } else {
+      // Otherwise, determine state based on most recent action
+      setState('waiting-to-eat');
+    }
   };
 
   const handleTookCobenfy = () => {
     const now = new Date();
     setLastCobenfy(now);
-    setState('waiting-to-eat');
+    // If we have no meal time or can already eat, go to waiting to eat
+    if (!lastMeal || canEat()) {
+      setState('waiting-to-eat');
+    } else {
+      // Otherwise, determine state based on most recent action
+      setState('waiting-for-cobenfy');
+    }
   };
 
   const resetCycle = () => {
@@ -49,13 +60,13 @@ const TimingTimer = () => {
   };
 
   const canTakeCobenfy = () => {
-    if (!lastMeal) return false;
+    if (!lastMeal) return true;
     const safeTime = new Date(lastMeal.getTime() + 2 * 60 * 60 * 1000);
     return currentTime >= safeTime;
   };
 
   const canEat = () => {
-    if (!lastCobenfy) return false;
+    if (!lastCobenfy) return true;
     const safeTime = new Date(lastCobenfy.getTime() + 2 * 60 * 60 * 1000);
     return currentTime >= safeTime;
   };
@@ -70,120 +81,109 @@ const TimingTimer = () => {
     return new Date(lastCobenfy.getTime() + 2 * 60 * 60 * 1000);
   };
 
-  const renderIdleState = () => (
-    <div className="text-center space-y-4">
-      <div className="flex items-center justify-center gap-2 mb-4">
-        <Clock size={20} className="text-hot-pink" />
-        <span className="text-lg font-semibold">Current Time: {currentTime.toLocaleTimeString()}</span>
-      </div>
-      
-      <h3 className="text-xl font-semibold mb-4">Ready to track your cycle</h3>
-      <p className="text-muted-foreground mb-4">Start by logging when you eat</p>
-      
-      <Button 
-        onClick={handleAte} 
-        className="bg-white text-hot-pink hover:bg-gray-100 border border-hot-pink flex items-center gap-2"
-      >
-        <Utensils size={18} />
-        I just ate
-      </Button>
-    </div>
-  );
+  const renderMainContent = () => {
+    if (state === 'idle') {
+      return (
+        <div className="text-center space-y-4">
+          <h3 className="text-xl font-semibold mb-4">Ready to track your cycle</h3>
+          <p className="text-muted-foreground mb-4">Log your food or Cobenfy to start tracking</p>
+          
+          <div className="flex gap-3 justify-center">
+            <Button 
+              onClick={handleAte} 
+              className="bg-white text-hot-pink hover:bg-gray-100 border border-hot-pink flex items-center gap-2"
+            >
+              <Utensils size={18} />
+              I just ate
+            </Button>
+            <Button 
+              onClick={handleTookCobenfy} 
+              className="bg-white text-hot-pink hover:bg-gray-100 border border-hot-pink flex items-center gap-2"
+            >
+              <Pill size={18} />
+              I took Cobenfy
+            </Button>
+          </div>
+        </div>
+      );
+    }
 
-  const renderWaitingForCobenfy = () => {
-    const safeTime = getSafeCobenFyTime();
-    const timeLeft = safeTime ? formatTimeUntil(safeTime) : null;
-    const isSafe = canTakeCobenfy();
+    const safeCobenFyTime = getSafeCobenFyTime();
+    const safeEatTime = getSafeEatTime();
+    const cobenFyTimeLeft = safeCobenFyTime ? formatTimeUntil(safeCobenFyTime) : null;
+    const eatTimeLeft = safeEatTime ? formatTimeUntil(safeEatTime) : null;
+    const isSafeForCobenfy = canTakeCobenfy();
+    const isSafeToEat = canEat();
 
     return (
       <div className="space-y-4">
-        <div className="text-center">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <Clock size={20} className="text-hot-pink" />
-            <span className="text-lg font-semibold">Current Time: {currentTime.toLocaleTimeString()}</span>
-          </div>
+        {/* Last actions display */}
+        <div className="text-center text-sm space-y-1">
           {lastMeal && (
-            <p className="text-sm text-muted-foreground">Last meal: {lastMeal.toLocaleTimeString()}</p>
+            <p className="text-muted-foreground">Last meal: {lastMeal.toLocaleTimeString()}</p>
           )}
-        </div>
-
-        <div className="text-center py-4">
-          {isSafe ? (
-            <div className="space-y-3">
-              <h3 className="text-xl font-semibold text-gold">✅ Safe to take Cobenfy!</h3>
-              <p className="text-sm text-muted-foreground">It's been 2+ hours since you ate</p>
-              <Button 
-                onClick={handleTookCobenfy}
-                className="bg-white text-hot-pink hover:bg-gray-100 border border-hot-pink flex items-center gap-2 mx-auto"
-              >
-                <Pill size={18} />
-                I took Cobenfy
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <h3 className="text-xl font-semibold text-champagne">⏰ Wait before taking Cobenfy</h3>
-              {timeLeft && (
-                <div className="text-2xl font-mono text-hot-pink">{timeLeft}</div>
-              )}
-              <p className="text-sm text-muted-foreground">Until you can safely take Cobenfy</p>
-            </div>
-          )}
-        </div>
-
-        <div className="text-center">
-          <Button 
-            onClick={resetCycle} 
-            variant="outline" 
-            size="sm"
-            className="text-muted-foreground"
-          >
-            Reset cycle
-          </Button>
-        </div>
-      </div>
-    );
-  };
-
-  const renderWaitingToEat = () => {
-    const safeTime = getSafeEatTime();
-    const timeLeft = safeTime ? formatTimeUntil(safeTime) : null;
-    const isSafe = canEat();
-
-    return (
-      <div className="space-y-4">
-        <div className="text-center">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <Clock size={20} className="text-hot-pink" />
-            <span className="text-lg font-semibold">Current Time: {currentTime.toLocaleTimeString()}</span>
-          </div>
           {lastCobenfy && (
-            <p className="text-sm text-muted-foreground">Last Cobenfy: {lastCobenfy.toLocaleTimeString()}</p>
+            <p className="text-muted-foreground">Last Cobenfy: {lastCobenfy.toLocaleTimeString()}</p>
           )}
         </div>
 
+        {/* Current status */}
         <div className="text-center py-4">
-          {isSafe ? (
-            <div className="space-y-3">
-              <h3 className="text-xl font-semibold text-gold">🍽️ Safe to eat!</h3>
-              <p className="text-sm text-muted-foreground">It's been 2+ hours since you took Cobenfy</p>
-              <Button 
-                onClick={handleAte}
-                className="bg-white text-hot-pink hover:bg-gray-100 border border-hot-pink flex items-center gap-2 mx-auto"
-              >
-                <Utensils size={18} />
-                I just ate
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <h3 className="text-xl font-semibold text-champagne">⏰ Wait before eating</h3>
-              {timeLeft && (
-                <div className="text-2xl font-mono text-hot-pink">{timeLeft}</div>
+          {state === 'waiting-for-cobenfy' && (
+            <>
+              {isSafeForCobenfy ? (
+                <div className="space-y-3">
+                  <h3 className="text-xl font-semibold text-gold">✅ Safe to take Cobenfy!</h3>
+                  <p className="text-sm text-muted-foreground">It's been 2+ hours since you ate</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <h3 className="text-xl font-semibold text-champagne">⏰ Wait before taking Cobenfy</h3>
+                  {cobenFyTimeLeft && (
+                    <div className="text-2xl font-mono text-hot-pink">{cobenFyTimeLeft}</div>
+                  )}
+                  <p className="text-sm text-muted-foreground">Until you can safely take Cobenfy</p>
+                </div>
               )}
-              <p className="text-sm text-muted-foreground">Until you can safely eat</p>
-            </div>
+            </>
           )}
+
+          {state === 'waiting-to-eat' && (
+            <>
+              {isSafeToEat ? (
+                <div className="space-y-3">
+                  <h3 className="text-xl font-semibold text-gold">🍽️ Safe to eat!</h3>
+                  <p className="text-sm text-muted-foreground">It's been 2+ hours since you took Cobenfy</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <h3 className="text-xl font-semibold text-champagne">⏰ Wait before eating</h3>
+                  {eatTimeLeft && (
+                    <div className="text-2xl font-mono text-hot-pink">{eatTimeLeft}</div>
+                  )}
+                  <p className="text-sm text-muted-foreground">Until you can safely eat</p>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Action buttons */}
+        <div className="flex gap-3 justify-center">
+          <Button 
+            onClick={handleAte} 
+            className="bg-white text-hot-pink hover:bg-gray-100 border border-hot-pink flex items-center gap-2"
+          >
+            <Utensils size={18} />
+            I just ate
+          </Button>
+          <Button 
+            onClick={handleTookCobenfy} 
+            className="bg-white text-hot-pink hover:bg-gray-100 border border-hot-pink flex items-center gap-2"
+          >
+            <Pill size={18} />
+            I took Cobenfy
+          </Button>
         </div>
 
         <div className="text-center">
@@ -207,10 +207,13 @@ const TimingTimer = () => {
         <h2 className="text-2xl font-semibold text-foreground">Cobenfy Timer</h2>
       </div>
 
+      <div className="flex items-center justify-center gap-2 mb-4">
+        <Clock size={20} className="text-hot-pink" />
+        <span className="text-lg font-semibold">Current Time: {currentTime.toLocaleTimeString()}</span>
+      </div>
+
       <Card className="medication-card bg-gray-800 border-l-4 border-l-hot-pink p-6">
-        {state === 'idle' && renderIdleState()}
-        {state === 'waiting-for-cobenfy' && renderWaitingForCobenfy()}
-        {state === 'waiting-to-eat' && renderWaitingToEat()}
+        {renderMainContent()}
       </Card>
 
       <Card className="medication-card bg-gray-800 border-l-4 border-l-champagne p-4">
