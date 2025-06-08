@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -92,14 +91,14 @@ const TimingTimer = () => {
           <div className="flex gap-3 justify-center">
             <Button 
               onClick={handleAte} 
-              className="bg-white !text-hot-pink font-bold hover:bg-gray-100 border border-hot-pink flex items-center gap-2"
+              className="bg-hot-pink text-black font-bold hover:bg-hot-pink/90 flex items-center gap-2"
             >
               <Utensils size={18} />
               I just ate
             </Button>
             <Button 
               onClick={handleTookCobenfy} 
-              className="bg-white !text-hot-pink font-bold hover:bg-gray-100 border border-hot-pink flex items-center gap-2"
+              className="bg-hot-pink text-black font-bold hover:bg-hot-pink/90 flex items-center gap-2"
             >
               <Pill size={18} />
               I took Cobenfy
@@ -173,14 +172,14 @@ const TimingTimer = () => {
         <div className="flex gap-3 justify-center">
           <Button 
             onClick={handleAte} 
-            className="bg-white !text-hot-pink font-bold hover:bg-gray-100 border border-hot-pink flex items-center gap-2"
+            className="bg-hot-pink text-black font-bold hover:bg-hot-pink/90 flex items-center gap-2"
           >
             <Utensils size={18} />
             I just ate
           </Button>
           <Button 
             onClick={handleTookCobenfy} 
-            className="bg-white !text-hot-pink font-bold hover:bg-gray-100 border border-hot-pink flex items-center gap-2"
+            className="bg-hot-pink text-black font-bold hover:bg-hot-pink/90 flex items-center gap-2"
           >
             <Pill size={18} />
             I took Cobenfy
