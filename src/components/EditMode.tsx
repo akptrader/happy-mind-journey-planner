@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Edit, Save, X } from 'lucide-react';
+import { Edit, Save, X, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface EditableItem {
