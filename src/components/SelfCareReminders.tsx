@@ -101,16 +101,23 @@ const SelfCareReminders = () => {
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'relaxation':
-        return 'border-l-hot-pink bg-pink-50';
+        return 'border-l-hot-pink bg-gray-800';
       case 'motivation':
-        return 'border-l-foreground bg-gray-50';
+        return 'border-l-gold bg-gray-800';
       case 'mindfulness':
-        return 'border-l-champagne-dark bg-champagne-light';
+        return 'border-l-champagne bg-gray-800';
       case 'movement':
-        return 'border-l-champagne bg-champagne-light';
+        return 'border-l-champagne-dark bg-gray-800';
       default:
-        return 'border-l-gray-300 bg-gray-50';
+        return 'border-l-gray-300 bg-gray-800';
     }
+  };
+
+  const getButtonStyle = (index: number, completed: boolean) => {
+    if (completed) {
+      return 'bg-accent text-accent-foreground cursor-not-allowed';
+    }
+    return index % 2 === 0 ? 'btn-gold' : 'btn-hot-pink';
   };
 
   return (
@@ -120,14 +127,14 @@ const SelfCareReminders = () => {
         <h2 className="text-2xl font-semibold text-foreground">Self-Care Reminders</h2>
       </div>
 
-      <Card className="medication-card calm-gradient text-gray-800">
+      <Card className="medication-card calm-gradient text-foreground">
         <div className="text-center">
           <h3 className="text-lg font-semibold mb-2">Remember to be kind to yourself today 💚</h3>
           <p className="text-sm opacity-80">Your mental health journey matters, and every small step counts.</p>
         </div>
       </Card>
 
-      {reminders.map((reminder) => (
+      {reminders.map((reminder, index) => (
         <Card key={reminder.id} className={`medication-card border-l-4 ${getTypeColor(reminder.type)} ${reminder.completed ? 'completed-task' : ''}`}>
           <div className="flex items-start justify-between">
             <div className="flex-1">
@@ -144,10 +151,7 @@ const SelfCareReminders = () => {
               onClick={() => markCompleted(reminder.id)}
               disabled={reminder.completed}
               size="sm"
-              className={`ml-4 ${reminder.completed 
-                ? 'bg-accent text-accent-foreground cursor-not-allowed' 
-                : 'bg-hot-pink hover:bg-hot-pink/90 text-white'
-              }`}
+              className={`ml-4 ${getButtonStyle(index, reminder.completed)}`}
             >
               {reminder.completed ? 'Done' : 'Complete'}
             </Button>
@@ -155,13 +159,13 @@ const SelfCareReminders = () => {
         </Card>
       ))}
 
-      <Card className="medication-card border-l-4 border-l-hot-pink bg-pink-50">
+      <Card className="medication-card border-l-4 border-l-hot-pink bg-gray-800">
         <div className="text-center">
           <h3 className="font-semibold mb-2">Need Support Right Now?</h3>
           <p className="text-sm text-muted-foreground mb-4">
             Motivation Hotline: <span className="font-mono font-bold">1-800-MOTIVATE</span>
           </p>
-          <Button className="bg-hot-pink hover:bg-hot-pink/90 text-white">
+          <Button className="btn-hot-pink">
             Call Now
           </Button>
         </div>

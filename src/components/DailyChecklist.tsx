@@ -68,13 +68,13 @@ const DailyChecklist = () => {
   const getCategoryColor = (category: string) => {
     switch (category) {
       case 'medication':
-        return 'border-l-hot-pink bg-pink-50';
+        return 'border-l-hot-pink bg-gray-800';
       case 'meals':
-        return 'border-l-champagne-dark bg-champagne-light';
+        return 'border-l-gold bg-gray-800';
       case 'selfcare':
-        return 'border-l-foreground bg-gray-50';
+        return 'border-l-champagne bg-gray-800';
       default:
-        return 'border-l-gray-300 bg-gray-50';
+        return 'border-l-gray-300 bg-gray-800';
     }
   };
 

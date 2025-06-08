@@ -78,14 +78,21 @@ const MedicationTracker = () => {
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'cobenfy':
-        return 'border-l-hot-pink bg-pink-50';
+        return 'border-l-hot-pink bg-gray-800';
       case 'latuda':
-        return 'border-l-foreground bg-gray-50';
+        return 'border-l-gold bg-gray-800';
       case 'anti-nausea':
-        return 'border-l-champagne-dark bg-champagne-light';
+        return 'border-l-champagne-dark bg-gray-800';
       default:
-        return 'border-l-gray-300 bg-gray-50';
+        return 'border-l-gray-300 bg-gray-800';
     }
+  };
+
+  const getButtonStyle = (index: number, taken: boolean) => {
+    if (taken) {
+      return 'bg-accent text-accent-foreground cursor-not-allowed';
+    }
+    return index % 2 === 0 ? 'btn-gold' : 'btn-hot-pink';
   };
 
   return (
@@ -95,7 +102,7 @@ const MedicationTracker = () => {
         <h2 className="text-2xl font-semibold text-foreground">Today's Medications</h2>
       </div>
       
-      {medications.map((med) => (
+      {medications.map((med, index) => (
         <Card key={med.id} className={`medication-card border-l-4 ${getTypeColor(med.type)} ${med.taken ? 'completed-task' : ''}`}>
           <div className="flex items-center justify-between">
             <div className="flex-1">
@@ -110,10 +117,7 @@ const MedicationTracker = () => {
             <Button
               onClick={() => markAsTaken(med.id)}
               disabled={med.taken}
-              className={`ml-4 ${med.taken 
-                ? 'bg-accent text-accent-foreground cursor-not-allowed' 
-                : 'bg-primary hover:bg-primary/90'
-              }`}
+              className={`ml-4 ${getButtonStyle(index, med.taken)}`}
             >
               {med.taken ? <Check size={18} /> : 'Take'}
             </Button>

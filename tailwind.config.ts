@@ -58,7 +58,8 @@ export default {
 					DEFAULT: 'hsl(var(--champagne))',
 					light: 'hsl(var(--light-champagne))',
 					dark: 'hsl(var(--dark-champagne))',
-				}
+				},
+				gold: 'hsl(var(--gold))'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
