@@ -11,8 +11,9 @@ import EditMode from './EditMode';
 import ExerciseTracker from './ExerciseTracker';
 import PersonalTodos from './PersonalTodos';
 import DietTracker from './DietTracker';
+import HealthMetrics from './HealthMetrics';
 import Analytics from './Analytics';
-import { Bell, List, Heart, Calendar, Timer, Edit, Smartphone, Dumbbell, CheckSquare, Apple, TrendingUp } from 'lucide-react';
+import { Bell, List, Heart, Calendar, Timer, Edit, Smartphone, Dumbbell, CheckSquare, Apple, TrendingUp, Activity } from 'lucide-react';
 import { NotificationService } from '@/services/NotificationService';
 import { useToast } from '@/hooks/use-toast';
 
@@ -106,10 +107,14 @@ const WellnessApp = () => {
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-9 mb-8">
+          <TabsList className="grid w-full grid-cols-10 mb-8">
             <TabsTrigger value="medications" className="flex items-center gap-2">
               <Bell size={18} />
               <span className="hidden sm:inline">Meds</span>
+            </TabsTrigger>
+            <TabsTrigger value="health" className="flex items-center gap-2">
+              <Activity size={18} />
+              <span className="hidden sm:inline">Health</span>
             </TabsTrigger>
             <TabsTrigger value="timer" className="flex items-center gap-2">
               <Timer size={18} />
@@ -147,6 +152,10 @@ const WellnessApp = () => {
 
           <TabsContent value="medications" className="animate-slide-in">
             <MedicationTracker />
+          </TabsContent>
+
+          <TabsContent value="health" className="animate-slide-in">
+            <HealthMetrics onBack={() => setActiveTab('medications')} />
           </TabsContent>
 
           <TabsContent value="timer" className="animate-slide-in">

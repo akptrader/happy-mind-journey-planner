@@ -1,63 +1,51 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Bell,
-  List,
-  Heart,
-  Calendar,
-  Timer,
-  Edit,
-  Plus,
-  History,
-  Activity,
-  Pill,
-  TrendingUp
-} from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Bell, Plus, History, Clock, Check, X, Pill, TrendingUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import AddMedicationDialog from './AddMedicationDialog';
 import MedicationHistory from './MedicationHistory';
-import MoodTracker from './MoodTracker';
-import HealthMetrics from './HealthMetrics';
-import Supplements from './Supplements';
-import AddSupplementDialog from './AddSupplementDialog';
-import Analytics from './Analytics';
-import ExerciseTracker from './ExerciseTracker';
+import MedicationDosageTracker from './MedicationDosageTracker';
 
 interface Medication {
   id: string;
   name: string;
-  dosage: string;
-  frequency: string;
-  notes?: string;
+  time: string;
+  instructions: string;
+  type: 'cobenfy' | 'latuda' | 'seroquel' | 'caplyta' | 'lantus' | 'custom';
+  dosage?: string;
+  frequency?: string;
 }
 
 interface MedicationLog {
   id: string;
   medicationId: string;
+  medicationName: string;
   timestamp: string;
+  taken: boolean;
+  notes?: string;
 }
 
 const MedicationTracker = () => {
-  const [medications, setMedications] = useState<Medication[]>(() => {
-    const saved = localStorage.getItem('medications');
-    return saved ? JSON.parse(saved) : [];
-  });
-  const [medicationLog, setMedicationLog] = useState<MedicationLog[]>(() => {
-    const saved = localStorage.getItem('medicationLog');
-    return saved ? JSON.parse(saved) : [];
-  });
-  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [medications, setMedications] = useState<Medication[]>([]);
+  const [medicationLog, setMedicationLog] = useState<MedicationLog[]>([]);
+  const [addMedicationOpen, setAddMedicationOpen] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
-  const [showMoodTracker, setShowMoodTracker] = useState(false);
-  const [showHealthMetrics, setShowHealthMetrics] = useState(false);
-  const [showSupplements, setShowSupplements] = useState(false);
-  const [showAnalytics, setShowAnalytics] = useState(false);
-  const [showExercise, setShowExercise] = useState(false);
+  const [activeTab, setActiveTab] = useState('current');
   const { toast } = useToast();
+
+  useEffect(() => {
+    const savedMedications = localStorage.getItem('medications');
+    if (savedMedications) {
+      setMedications(JSON.parse(savedMedications));
+    }
+
+    const savedMedicationLog = localStorage.getItem('medicationLog');
+    if (savedMedicationLog) {
+      setMedicationLog(JSON.parse(savedMedicationLog));
+    }
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('medications', JSON.stringify(medications));
@@ -67,184 +55,162 @@ const MedicationTracker = () => {
     localStorage.setItem('medicationLog', JSON.stringify(medicationLog));
   }, [medicationLog]);
 
-  const addMedication = (medicationData: any) => {
-    const medication = {
+  const handleAddMedication = (medication: Medication) => {
+    const newMedication = { ...medication, id: Date.now().toString() };
+    setMedications(prev => [...prev, newMedication]);
+    setAddMedicationOpen(false);
+  };
+
+  const logMedication = (medication: Medication) => {
+    const now = new Date();
+    const newLog: MedicationLog = {
       id: Date.now().toString(),
-      name: medicationData.name,
-      dosage: medicationData.dosage,
-      frequency: medicationData.frequency || 'Daily',
-      notes: medicationData.notes
+      medicationId: medication.id,
+      medicationName: medication.name,
+      timestamp: now.toISOString(),
+      taken: true,
     };
-    setMedications(prev => [...prev, medication]);
-    setShowAddDialog(false);
+    setMedicationLog(prev => [newLog, ...prev]);
     toast({
-      title: "Medication added! 💊",
-      description: `${medication.name} added to your list.`,
+      title: "Medication logged! 🔔",
+      description: `${medication.name} taken at ${now.toLocaleTimeString()}`,
     });
   };
 
-  const logMedication = (medicationId: string) => {
-    const newLogEntry: MedicationLog = {
+  const markMissed = (medication: Medication) => {
+    const now = new Date();
+    const newLog: MedicationLog = {
       id: Date.now().toString(),
-      medicationId: medicationId,
-      timestamp: new Date().toISOString(),
+      medicationId: medication.id,
+      medicationName: medication.name,
+      timestamp: now.toISOString(),
+      taken: false,
     };
-    setMedicationLog(prev => [...prev, newLogEntry]);
+    setMedicationLog(prev => [newLog, ...prev]);
     toast({
-      title: "Medication logged! ✅",
-      description: "Good job, keep it up!",
+      title: "Medication marked missed",
+      description: `You missed ${medication.name} at ${now.toLocaleTimeString()}`,
     });
   };
 
-  const deleteMedication = (id: string) => {
-    setMedications(prev => prev.filter(medication => medication.id !== id));
-    setMedicationLog(prev => prev.filter(log => log.medicationId !== id));
-    toast({
-      title: "Medication deleted! 🗑️",
-      description: "Medication removed from your list.",
-    });
-  };
-
-  if (showAnalytics) {
-    return <Analytics onBack={() => setShowAnalytics(false)} />;
-  }
+  const todayLogs = medicationLog.filter(log => 
+    new Date(log.timestamp).toDateString() === new Date().toDateString()
+  );
 
   if (showHistory) {
-    return <MedicationHistory
-      medications={medications}
-      medicationLog={medicationLog}
-      onBack={() => setShowHistory(false)}
-    />;
-  }
-
-  if (showMoodTracker) {
-    return <MoodTracker onBack={() => setShowMoodTracker(false)} />;
-  }
-
-  if (showHealthMetrics) {
-    return <HealthMetrics onBack={() => setShowHealthMetrics(false)} />;
-  }
-
-  if (showSupplements) {
-    return <Supplements onBack={() => setShowSupplements(false)} />;
-  }
-
-  if (showExercise) {
-    return <ExerciseTracker onBack={() => setShowExercise(false)} />;
+    return (
+      <MedicationHistory 
+        medications={medications}
+        medicationLog={medicationLog}
+        onBack={() => setShowHistory(false)}
+      />
+    );
   }
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Bell className="text-hot-pink" size={24} />
-          <h2 className="text-2xl font-semibold text-foreground">Medication Tracker</h2>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button
-            onClick={() => setShowAddDialog(true)}
-            className="bg-hot-pink text-black hover:bg-hot-pink/90"
-          >
-            <Plus size={18} />
-            Add Medication
-          </Button>
-          <Button
-            onClick={() => setShowHistory(true)}
-            variant="outline"
-            className="flex items-center gap-2"
-          >
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-3 mb-6">
+          <TabsTrigger value="current" className="flex items-center gap-2">
+            <Pill size={18} />
+            Current Meds
+          </TabsTrigger>
+          <TabsTrigger value="dosage" className="flex items-center gap-2">
+            <TrendingUp size={18} />
+            Dosage & Side Effects
+          </TabsTrigger>
+          <TabsTrigger value="history" className="flex items-center gap-2">
             <History size={18} />
             History
-          </Button>
-          <Button
-            onClick={() => setShowMoodTracker(true)}
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <Heart size={18} />
-            Mood
-          </Button>
-          <Button
-            onClick={() => setShowHealthMetrics(true)}
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <Activity size={18} />
-            Health
-          </Button>
-          <Button
-            onClick={() => setShowSupplements(true)}
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <Pill size={18} />
-            Supplements
-          </Button>
-          <Button
-            onClick={() => setShowAnalytics(true)}
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <TrendingUp size={18} />
-            Analytics
-          </Button>
-        </div>
-      </div>
+          </TabsTrigger>
+        </TabsList>
 
-      {medications.length === 0 ? (
-        <Card className="medication-card bg-gray-800 p-6 text-center">
-          <Bell className="text-hot-pink mx-auto mb-4" size={48} />
-          <h3 className="text-lg font-semibold text-foreground mb-2">No Medications Added</h3>
-          <p className="text-muted-foreground">Add your medications to start tracking.</p>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {medications.map((medication) => (
-            <Card key={medication.id} className="medication-card bg-gray-800 p-4">
-              <div className="flex items-start justify-between">
-                <div className="space-y-2">
-                  <h3 className="text-xl font-semibold text-gold">{medication.name}</h3>
-                  <p className="text-sm text-champagne">
-                    {medication.dosage}, {medication.frequency}
-                  </p>
-                  {medication.notes && (
-                    <p className="text-xs text-muted-foreground">{medication.notes}</p>
-                  )}
-                </div>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => deleteMedication(medication.id)}
-                >
-                  <List className="h-4 w-4" />
-                </Button>
-              </div>
-              <div className="flex justify-between items-center mt-4">
-                <Button
-                  className="bg-hot-pink text-black hover:bg-hot-pink/90"
-                  onClick={() => logMedication(medication.id)}
-                >
-                  Take Now
-                </Button>
-                <span className="text-xs text-muted-foreground">
-                  Last taken:{' '}
-                  {medicationLog
-                    .filter((log) => log.medicationId === medication.id)
-                    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-                    .slice(0, 1)
-                    .map((log) => (
-                      <span key={log.id}>
-                        {new Date(log.timestamp).toLocaleDateString()}
-                      </span>
-                    ))}
-                </span>
-              </div>
-            </Card>
-          ))}
-        </div>
-      )}
+        <TabsContent value="current" className="animate-fade-in">
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center gap-2">
+              <Bell className="text-hot-pink" size={24} />
+              <h2 className="text-2xl font-semibold text-foreground">Today's Medications</h2>
+            </div>
+            <Button
+              onClick={() => setAddMedicationOpen(true)}
+              className="bg-hot-pink text-black hover:bg-hot-pink/90"
+            >
+              <Plus size={18} />
+              Add Medication
+            </Button>
+          </div>
 
-      <AddMedicationDialog open={showAddDialog} onOpenChange={setShowAddDialog} onSubmit={addMedication} />
+          <Card className="medication-card bg-gray-800 p-4">
+            {medications.length === 0 ? (
+              <p className="text-muted-foreground text-center py-4">No medications added yet</p>
+            ) : (
+              <div className="space-y-3">
+                {medications.map((medication) => {
+                  const lastLog = todayLogs.find(log => log.medicationId === medication.id);
+                  const taken = lastLog?.taken ?? false;
+
+                  return (
+                    <Card key={medication.id} className="bg-gray-700">
+                      <div className="flex items-center justify-between p-3">
+                        <div>
+                          <h3 className="text-lg font-semibold text-foreground">{medication.name}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Time: {medication.time}, Dosage: {medication.dosage}
+                          </p>
+                          <p className="text-sm text-champagne">{medication.instructions}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {taken ? (
+                            <Button variant="outline" disabled>
+                              <Check size={16} className="mr-2" />
+                              Taken
+                            </Button>
+                          ) : (
+                            <>
+                              <Button
+                                onClick={() => logMedication(medication)}
+                                className="bg-green-500 text-black hover:bg-green-500/90"
+                              >
+                                <Clock size={16} className="mr-2" />
+                                Log Taken
+                              </Button>
+                              <Button
+                                onClick={() => markMissed(medication)}
+                                className="bg-red-500 text-black hover:bg-red-500/90"
+                              >
+                                <X size={16} className="mr-2" />
+                                Mark Missed
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </Card>
+          
+          <AddMedicationDialog
+            open={addMedicationOpen}
+            onOpenChange={setAddMedicationOpen}
+            onSubmit={handleAddMedication}
+          />
+        </TabsContent>
+
+        <TabsContent value="dosage" className="animate-fade-in">
+          <MedicationDosageTracker />
+        </TabsContent>
+
+        <TabsContent value="history" className="animate-fade-in">
+          <MedicationHistory 
+            medications={medications}
+            medicationLog={medicationLog}
+            onBack={() => setActiveTab('current')}
+          />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
