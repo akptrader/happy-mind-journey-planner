@@ -4,17 +4,19 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { List, Download, Edit, Trash2, Save, X, Plus } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { List, Download, Edit, Trash2, Save, X, Sun, Moon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface Medication {
   id: string;
   name: string;
-  time: string;
   instructions: string;
   type: 'cobenfy' | 'latuda' | 'seroquel' | 'caplyta' | 'lantus' | 'custom';
   dosage: string;
   frequency: string;
+  takeMorning: boolean;
+  takeEvening: boolean;
 }
 
 interface MedicationListProps {
@@ -106,23 +108,40 @@ const MedicationList = ({
                         />
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Time</label>
-                        <Input
-                          type="time"
-                          value={editForm.time}
-                          onChange={(e) => setEditForm(prev => prev ? {...prev, time: e.target.value} : null)}
-                          className="bg-gray-600"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Frequency</label>
-                        <Input
-                          value={editForm.frequency}
-                          onChange={(e) => setEditForm(prev => prev ? {...prev, frequency: e.target.value} : null)}
-                          className="bg-gray-600"
-                        />
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Frequency</label>
+                      <Input
+                        value={editForm.frequency}
+                        onChange={(e) => setEditForm(prev => prev ? {...prev, frequency: e.target.value} : null)}
+                        className="bg-gray-600"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">When do you take this medication?</label>
+                      <div className="flex flex-col gap-3 mt-2">
+                        <div className="flex items-center space-x-3 p-3 bg-gray-600 rounded-lg">
+                          <Sun className="text-yellow-400" size={20} />
+                          <span className="text-foreground font-medium">Morning</span>
+                          <Checkbox
+                            checked={editForm.takeMorning}
+                            onCheckedChange={(checked) => 
+                              setEditForm(prev => prev ? {...prev, takeMorning: checked as boolean} : null)
+                            }
+                            className="ml-auto"
+                          />
+                        </div>
+                        
+                        <div className="flex items-center space-x-3 p-3 bg-gray-600 rounded-lg">
+                          <Moon className="text-blue-400" size={20} />
+                          <span className="text-foreground font-medium">Evening</span>
+                          <Checkbox
+                            checked={editForm.takeEvening}
+                            onCheckedChange={(checked) => 
+                              setEditForm(prev => prev ? {...prev, takeEvening: checked as boolean} : null)
+                            }
+                            className="ml-auto"
+                          />
+                        </div>
                       </div>
                     </div>
                     <div>
@@ -154,7 +173,23 @@ const MedicationList = ({
                         </span>
                       </div>
                       <div className="text-sm text-muted-foreground space-y-1">
-                        <p><span className="text-champagne">Time:</span> {medication.time}</p>
+                        <div className="flex items-center gap-2">
+                          <span className="text-champagne">Schedule:</span>
+                          <div className="flex gap-2">
+                            {medication.takeMorning && (
+                              <span className="flex items-center gap-1 text-yellow-400">
+                                <Sun size={14} />
+                                Morning
+                              </span>
+                            )}
+                            {medication.takeEvening && (
+                              <span className="flex items-center gap-1 text-blue-400">
+                                <Moon size={14} />
+                                Evening
+                              </span>
+                            )}
+                          </div>
+                        </div>
                         <p><span className="text-champagne">Frequency:</span> {medication.frequency}</p>
                         <p><span className="text-champagne">Instructions:</span> {medication.instructions}</p>
                       </div>
