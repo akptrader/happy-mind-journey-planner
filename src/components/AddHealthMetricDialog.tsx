@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -94,7 +93,7 @@ const AddHealthMetricDialog = ({ open, onOpenChange, onSubmit }: AddHealthMetric
 
   const handleCancel = () => {
     handleReset();
-    on Open Change(false);
+    onOpenChange(false);
   };
 
   return (
