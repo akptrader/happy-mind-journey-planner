@@ -6,7 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { TrendingUp, Settings, X } from 'lucide-react';
+import { TrendingUp, Settings, X, Download } from 'lucide-react';
 import { loadFlexibleAnalyticsData } from '@/utils/flexibleAnalyticsData';
 
 interface MetricOption {
@@ -80,6 +80,39 @@ const FlexibleAnalytics = ({ timeRange }: FlexibleAnalyticsProps) => {
     setSelectedMetrics(prev => prev.filter(id => id !== metricId));
   };
 
+  const exportToCSV = () => {
+    if (chartData.length === 0) return;
+
+    // Create CSV headers
+    const headers = ['Date', ...selectedMetricOptions.map(option => `${option.label}${option.unit ? ` (${option.unit})` : ''}`)];
+    
+    // Create CSV rows
+    const csvRows = [
+      headers.join(','),
+      ...chartData.map(row => {
+        const values = [
+          row.date,
+          ...selectedMetricOptions.map(option => row[option.dataKey] ?? '')
+        ];
+        return values.join(',');
+      })
+    ];
+
+    // Create and download file
+    const csvContent = csvRows.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    
+    const dateStr = new Date().toISOString().split('T')[0];
+    link.setAttribute('download', `custom-analytics-${dateStr}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const selectedMetricOptions = metricOptions.filter(option => selectedMetrics.includes(option.id));
 
   const chartConfig = selectedMetricOptions.reduce((config, option) => {
@@ -99,14 +132,25 @@ const FlexibleAnalytics = ({ timeRange }: FlexibleAnalyticsProps) => {
             <TrendingUp className="text-hot-pink" size={20} />
             <h3 className="text-lg font-semibold text-foreground">Custom Analytics</h3>
           </div>
-          <Button
-            onClick={() => setShowSettings(!showSettings)}
-            variant="outline"
-            size="sm"
-          >
-            <Settings size={16} className="mr-2" />
-            Customize
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={exportToCSV}
+              variant="outline"
+              size="sm"
+              disabled={chartData.length === 0}
+            >
+              <Download size={16} className="mr-2" />
+              Export CSV
+            </Button>
+            <Button
+              onClick={() => setShowSettings(!showSettings)}
+              variant="outline"
+              size="sm"
+            >
+              <Settings size={16} className="mr-2" />
+              Customize
+            </Button>
+          </div>
         </div>
         
         <div className="flex flex-wrap gap-2 mb-4">
