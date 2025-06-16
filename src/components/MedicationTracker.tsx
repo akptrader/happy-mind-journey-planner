@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,7 +15,7 @@ interface Medication {
   instructions: string;
   type: 'cobenfy' | 'latuda' | 'seroquel' | 'caplyta' | 'lantus' | 'custom';
   dosage: string;
-  frequency?: string;
+  frequency: string;
 }
 
 interface MedicationLog {
@@ -39,7 +38,13 @@ const MedicationTracker = () => {
   useEffect(() => {
     const savedMedications = localStorage.getItem('medications');
     if (savedMedications) {
-      setMedications(JSON.parse(savedMedications));
+      const parsedMedications = JSON.parse(savedMedications);
+      // Ensure all medications have a frequency property
+      const medicationsWithFrequency = parsedMedications.map((med: any) => ({
+        ...med,
+        frequency: med.frequency || 'Daily'
+      }));
+      setMedications(medicationsWithFrequency);
     }
 
     const savedMedicationLog = localStorage.getItem('medicationLog');
@@ -57,7 +62,11 @@ const MedicationTracker = () => {
   }, [medicationLog]);
 
   const handleAddMedication = (medication: Medication) => {
-    const newMedication = { ...medication, id: Date.now().toString() };
+    const newMedication = { 
+      ...medication, 
+      id: Date.now().toString(),
+      frequency: medication.frequency || 'Daily'
+    };
     setMedications(prev => [...prev, newMedication]);
     setAddMedicationOpen(false);
   };
