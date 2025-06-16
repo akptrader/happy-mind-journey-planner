@@ -3,11 +3,12 @@ import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { BarChart3, Activity, Heart, Pill } from 'lucide-react';
+import { BarChart3, Activity, Heart, Pill, FileText } from 'lucide-react';
 import FlexibleAnalytics from './FlexibleAnalytics';
 import MoodAnalytics from './MoodAnalytics';
 import HealthMetricsAnalytics from './HealthMetricsAnalytics';
 import MedicationAnalytics from './MedicationAnalytics';
+import MedicalSummary from './MedicalSummary';
 
 const Analytics = () => {
   const [timeRange, setTimeRange] = useState('30d');
@@ -32,8 +33,12 @@ const Analytics = () => {
         </Select>
       </div>
 
-      <Tabs defaultValue="flexible" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 mb-6">
+      <Tabs defaultValue="medical-summary" className="w-full">
+        <TabsList className="grid w-full grid-cols-5 mb-6">
+          <TabsTrigger value="medical-summary" className="flex items-center gap-2">
+            <FileText size={18} />
+            Medical Summary
+          </TabsTrigger>
           <TabsTrigger value="flexible" className="flex items-center gap-2">
             <BarChart3 size={18} />
             Custom
@@ -51,6 +56,10 @@ const Analytics = () => {
             Dosage
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="medical-summary" className="animate-fade-in">
+          <MedicalSummary timeRange={timeRange} />
+        </TabsContent>
 
         <TabsContent value="flexible" className="animate-fade-in">
           <FlexibleAnalytics timeRange={timeRange} />

@@ -2,13 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bell, Plus, History, Clock, Check, X, Pill, List, Download, TrendingUp } from 'lucide-react';
+import { Bell, Plus, History, Clock, Check, X, Pill, List, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import AddMedicationDialog from './AddMedicationDialog';
 import MedicationHistory from './MedicationHistory';
 import SideEffectsTracker from './SideEffectsTracker';
 import MedicationList from './MedicationList';
-import MedicationSummary from './MedicationSummary';
 
 interface Medication {
   id: string;
@@ -213,7 +212,7 @@ const MedicationTracker = () => {
   return (
     <div className="space-y-4">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-5 mb-6">
+        <TabsList className="grid w-full grid-cols-4 mb-6">
           <TabsTrigger value="current" className="flex items-center gap-2">
             <Pill size={18} />
             Today
@@ -221,10 +220,6 @@ const MedicationTracker = () => {
           <TabsTrigger value="list" className="flex items-center gap-2">
             <List size={18} />
             Current List
-          </TabsTrigger>
-          <TabsTrigger value="summary" className="flex items-center gap-2">
-            <TrendingUp size={18} />
-            Summary
           </TabsTrigger>
           <TabsTrigger value="side-effects" className="flex items-center gap-2">
             <Pill size={18} />
@@ -336,13 +331,6 @@ const MedicationTracker = () => {
               });
             }}
             onExportPDF={exportToPDF}
-          />
-        </TabsContent>
-
-        <TabsContent value="summary" className="animate-fade-in">
-          <MedicationSummary 
-            medications={medications}
-            medicationLog={medicationLog}
           />
         </TabsContent>
 
