@@ -1,11 +1,11 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Plus, History, Timer, MapPin } from 'lucide-react';
+import { ArrowLeft, Plus, History, Timer, MapPin, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import AddExerciseDialog from './AddExerciseDialog';
 import ExerciseHistory from './ExerciseHistory';
+import ExerciseTimer from './ExerciseTimer';
 
 interface Exercise {
   id: string;
@@ -25,6 +25,7 @@ const ExerciseTracker = ({ onBack }: ExerciseTrackerProps) => {
   const { toast } = useToast();
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [showTimer, setShowTimer] = useState(false);
   
   const [exercises, setExercises] = useState<Exercise[]>(() => {
     const saved = localStorage.getItem('exercises');
@@ -47,6 +48,31 @@ const ExerciseTracker = ({ onBack }: ExerciseTrackerProps) => {
     toast({
       title: "Exercise logged! 💪",
       description: `${exercise.type} for ${exercise.duration} minutes recorded`,
+    });
+  };
+
+  const handleTimerComplete = (duration: number) => {
+    // Pre-fill the add dialog with timer duration
+    const timedExercise = {
+      type: 'other' as const,
+      duration,
+      intensity: 'moderate' as const,
+      notes: 'Completed with timer',
+      location: ''
+    };
+    
+    const newExercise: Exercise = {
+      ...timedExercise,
+      id: Date.now().toString(),
+      timestamp: new Date().toISOString()
+    };
+    
+    setExercises(prev => [newExercise, ...prev]);
+    setShowTimer(false);
+    
+    toast({
+      title: "Timed exercise logged! ⏱️",
+      description: `${duration} minutes of exercise recorded`,
     });
   };
 
@@ -89,6 +115,30 @@ const ExerciseTracker = ({ onBack }: ExerciseTrackerProps) => {
     );
   }
 
+  if (showTimer) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-4 mb-6">
+          <Button
+            onClick={() => setShowTimer(false)}
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft size={16} />
+            Back
+          </Button>
+          <div className="flex items-center gap-2">
+            <Clock className="text-hot-pink" size={24} />
+            <h2 className="text-2xl font-semibold text-foreground">Exercise Timer</h2>
+          </div>
+        </div>
+        
+        <ExerciseTimer onComplete={handleTimerComplete} />
+      </div>
+    );
+  }
+
   const todayExercises = exercises.filter(exercise => 
     new Date(exercise.timestamp).toDateString() === new Date().toDateString()
   );
@@ -112,6 +162,14 @@ const ExerciseTracker = ({ onBack }: ExerciseTrackerProps) => {
           <h2 className="text-2xl font-semibold text-foreground">Exercise Tracker</h2>
         </div>
         <div className="flex gap-2 ml-auto">
+          <Button
+            onClick={() => setShowTimer(true)}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <Clock size={18} />
+            Timer
+          </Button>
           <Button
             onClick={() => setAddDialogOpen(true)}
             className="bg-hot-pink text-black hover:bg-hot-pink/90"

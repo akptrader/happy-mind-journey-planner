@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, AreaChart, Area, BarChart, Bar } from 'recharts';
-import { Activity, Heart, Moon, TrendingUp } from 'lucide-react';
+import { Activity, Heart, Moon, TrendingUp, Droplets } from 'lucide-react';
 
 interface HealthMetricsAnalyticsProps {
   timeRange: string;
@@ -12,7 +12,7 @@ interface HealthMetricsAnalyticsProps {
 interface HealthMetric {
   id: string;
   timestamp: string;
-  type: 'heart-rate-variability' | 'sleep' | 'blood-pressure' | 'weight';
+  type: 'heart-rate-variability' | 'sleep' | 'blood-pressure' | 'weight' | 'blood-sugar';
   value: number;
   unit: string;
   notes?: string;
@@ -39,7 +39,7 @@ const HealthMetricsAnalytics = ({ timeRange }: HealthMetricsAnalyticsProps) => {
       setMetrics(recentMetrics);
 
       // Generate trend data for each metric type
-      const metricTypes = ['heart-rate-variability', 'sleep', 'blood-pressure', 'weight'] as const;
+      const metricTypes = ['heart-rate-variability', 'sleep', 'blood-pressure', 'weight', 'blood-sugar'] as const;
       const trends = [];
       
       for (let i = daysToCheck - 1; i >= 0; i--) {
@@ -107,18 +107,24 @@ const HealthMetricsAnalytics = ({ timeRange }: HealthMetricsAnalyticsProps) => {
       label: "Weight",
       color: "#10b981",
     },
+    'blood-sugar': {
+      label: "Blood Sugar",
+      color: "#f59e0b",
+    },
   };
 
   const getMetricIcon = (type: string) => {
     switch (type.toLowerCase()) {
       case 'heart rate variability':
         return <Heart className="text-red-500" size={20} />;
-      case 'sleep duration':
+      case 'sleep':
         return <Moon className="text-blue-500" size={20} />;
       case 'blood pressure':
         return <Activity className="text-purple-500" size={20} />;
       case 'weight':
         return <TrendingUp className="text-green-500" size={20} />;
+      case 'blood sugar':
+        return <Droplets className="text-yellow-500" size={20} />;
       default:
         return <Activity className="text-gray-500" size={20} />;
     }
@@ -162,6 +168,14 @@ const HealthMetricsAnalytics = ({ timeRange }: HealthMetricsAnalyticsProps) => {
               connectNulls={false}
               name="Weight (lbs)"
             />
+            <Line 
+              type="monotone" 
+              dataKey="blood-sugar" 
+              stroke="#f59e0b" 
+              strokeWidth={2}
+              connectNulls={false}
+              name="Blood Sugar (mg/dL)"
+            />
           </LineChart>
         </ChartContainer>
       </Card>
@@ -173,7 +187,7 @@ const HealthMetricsAnalytics = ({ timeRange }: HealthMetricsAnalyticsProps) => {
             <TrendingUp className="text-hot-pink" size={20} />
             <h3 className="text-lg font-semibold text-foreground">Average Values</h3>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {averageData.map((item, index) => (
               <Card key={index} className="bg-gray-700 p-4">
                 <div className="flex items-center gap-2 mb-2">

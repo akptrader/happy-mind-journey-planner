@@ -3,10 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, TrendingUp, Calendar, Activity, Heart } from 'lucide-react';
+import { ArrowLeft, TrendingUp, Calendar, Activity, Heart, Zap } from 'lucide-react';
 import MedicationAnalytics from './MedicationAnalytics';
 import MoodAnalytics from './MoodAnalytics';
 import HealthMetricsAnalytics from './HealthMetricsAnalytics';
+import CorrelationAnalytics from './CorrelationAnalytics';
 import InsightsPanel from './InsightsPanel';
 
 interface AnalyticsProps {
@@ -62,10 +63,14 @@ const Analytics = ({ onBack }: AnalyticsProps) => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4 mb-8">
+        <TabsList className="grid w-full grid-cols-5 mb-8">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <Calendar size={18} />
             <span className="hidden sm:inline">Overview</span>
+          </TabsTrigger>
+          <TabsTrigger value="correlations" className="flex items-center gap-2">
+            <Zap size={18} />
+            <span className="hidden sm:inline">Correlations</span>
           </TabsTrigger>
           <TabsTrigger value="medications" className="flex items-center gap-2">
             <Activity size={18} />
@@ -83,6 +88,10 @@ const Analytics = ({ onBack }: AnalyticsProps) => {
 
         <TabsContent value="overview" className="animate-fade-in">
           <InsightsPanel timeRange={timeRange} />
+        </TabsContent>
+
+        <TabsContent value="correlations" className="animate-fade-in">
+          <CorrelationAnalytics timeRange={timeRange} />
         </TabsContent>
 
         <TabsContent value="medications" className="animate-fade-in">
