@@ -7,7 +7,7 @@ const AppFooter: React.FC = () => {
     <div className="mt-12 text-center">
       <Card className="medication-card calm-gradient">
         <p className="text-sm text-gray-300">
-          💊 Stay consistent with your medication routine - your health matters!
+          🌟 Your health journey matters - track, analyze, and thrive with WellnessHub
         </p>
       </Card>
     </div>
