@@ -50,8 +50,8 @@ const Header: React.FC<HeaderProps> = ({ notificationsEnabled, onNotificationsCh
   return (
     <div className="text-center mb-8">
       <div className="wellness-gradient rounded-2xl p-6 text-white mb-6">
-        <h1 className="text-3xl font-bold mb-2">Wellness Companion</h1>
-        <p className="text-lg opacity-90">Managing your health journey with care</p>
+        <h1 className="text-3xl font-bold mb-2">MedMinder</h1>
+        <p className="text-lg opacity-90">Your flexible medication tracking companion</p>
         <div className="flex items-center justify-center gap-2 mt-4 text-sm opacity-80">
           <Calendar size={16} />
           <span>{currentDate}</span>
