@@ -18,7 +18,7 @@ interface HealthMetric {
 }
 
 interface HealthMetricsProps {
-  onBack: () => void;
+  onBack?: () => void;
 }
 
 const HealthMetrics = ({ onBack }: HealthMetricsProps) => {
@@ -96,15 +96,17 @@ const HealthMetrics = ({ onBack }: HealthMetricsProps) => {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-4 mb-6">
-        <Button
-          onClick={onBack}
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-2"
-        >
-          <ArrowLeft size={16} />
-          Back
-        </Button>
+        {onBack && (
+          <Button
+            onClick={onBack}
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft size={16} />
+            Back
+          </Button>
+        )}
         <div className="flex items-center gap-2">
           <Activity className="text-hot-pink" size={24} />
           <h2 className="text-2xl font-semibold text-foreground">Health Metrics</h2>

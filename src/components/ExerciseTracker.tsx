@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,7 +19,7 @@ interface Exercise {
 }
 
 interface ExerciseTrackerProps {
-  onBack: () => void;
+  onBack?: () => void;
 }
 
 const ExerciseTracker = ({ onBack }: ExerciseTrackerProps) => {
@@ -148,15 +149,17 @@ const ExerciseTracker = ({ onBack }: ExerciseTrackerProps) => {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-4 mb-6">
-        <Button
-          onClick={onBack}
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-2"
-        >
-          <ArrowLeft size={16} />
-          Back
-        </Button>
+        {onBack && (
+          <Button
+            onClick={onBack}
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft size={16} />
+            Back
+          </Button>
+        )}
         <div className="flex items-center gap-2">
           <span className="text-2xl">💪</span>
           <h2 className="text-2xl font-semibold text-foreground">Exercise Tracker</h2>
