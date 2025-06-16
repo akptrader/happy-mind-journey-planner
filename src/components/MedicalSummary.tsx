@@ -185,11 +185,13 @@ const MedicalSummary = ({ timeRange }: MedicalSummaryProps) => {
       }
     }
 
-    // Activity level
+    // Activity level - more neutral observations
     if (exerciseCount === 0) {
-      observations.push("No exercise activity recorded - physical activity may benefit overall wellness");
+      observations.push("No structured exercise activity recorded during this period");
     } else if (exerciseCount >= 3) {
-      observations.push("Regular exercise activity maintained throughout period");
+      observations.push("Regular structured exercise activity documented throughout period");
+    } else if (exerciseCount > 0) {
+      observations.push("Some structured exercise activity recorded during period");
     }
 
     // Side effects impact
