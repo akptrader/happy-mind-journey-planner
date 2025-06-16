@@ -281,70 +281,70 @@ const MedicalSummary = ({ timeRange }: MedicalSummaryProps) => {
           <div class="section">
             <h2>SLEEP PATTERNS</h2>
             <div class="metric">
-              <strong>Average Sleep Duration:</strong> ${summaryData.sleepPatterns.averageHours} hours 
-              <span class="assessment">(${summaryData.sleepPatterns.assessment})</span>
+              <strong>Average Sleep Duration:</strong> ${summaryData.sleepPatterns?.averageHours || 0} hours 
+              <span class="assessment">(${summaryData.sleepPatterns?.assessment || 'No Data'})</span>
             </div>
             <div class="metric">
-              <strong>Sleep Entries Recorded:</strong> ${summaryData.sleepPatterns.entriesRecorded}
+              <strong>Sleep Entries Recorded:</strong> ${summaryData.sleepPatterns?.entriesRecorded || 0}
             </div>
           </div>
 
           <div class="section">
             <h2>METABOLIC HEALTH</h2>
             <div class="metric">
-              <strong>Average Blood Sugar:</strong> ${summaryData.metabolicHealth.averageBloodSugar} mg/dL 
-              <span class="assessment">(${summaryData.metabolicHealth.assessment})</span>
+              <strong>Average Blood Sugar:</strong> ${summaryData.metabolicHealth?.averageBloodSugar || 0} mg/dL 
+              <span class="assessment">(${summaryData.metabolicHealth?.assessment || 'No Data'})</span>
             </div>
             <div class="metric">
-              <strong>Blood Sugar Entries:</strong> ${summaryData.metabolicHealth.entriesRecorded}
+              <strong>Blood Sugar Entries:</strong> ${summaryData.metabolicHealth?.entriesRecorded || 0}
             </div>
           </div>
 
           <div class="section">
             <h2>COGNITIVE FUNCTION</h2>
             <div class="metric">
-              <strong>Average Productivity:</strong> ${summaryData.cognitiveFunction.averageProductivity}/10
+              <strong>Average Productivity:</strong> ${summaryData.cognitiveFunction?.averageProductivity || 0}/10
             </div>
             <div class="metric">
-              <strong>Average Focus:</strong> ${summaryData.cognitiveFunction.averageFocus}/10
+              <strong>Average Focus:</strong> ${summaryData.cognitiveFunction?.averageFocus || 0}/10
             </div>
             <div class="metric">
-              <strong>Average Energy:</strong> ${summaryData.cognitiveFunction.averageEnergy}/10
+              <strong>Average Energy:</strong> ${summaryData.cognitiveFunction?.averageEnergy || 0}/10
             </div>
             <div class="metric">
-              <strong>Work Entries Recorded:</strong> ${summaryData.cognitiveFunction.entriesRecorded}
+              <strong>Work Entries Recorded:</strong> ${summaryData.cognitiveFunction?.entriesRecorded || 0}
             </div>
           </div>
 
           <div class="section">
             <h2>PHYSICAL ACTIVITY</h2>
             <div class="metric">
-              <strong>Total Exercise Minutes:</strong> ${summaryData.activityLevel.totalExerciseMinutes}
+              <strong>Total Exercise Minutes:</strong> ${summaryData.activityLevel?.totalExerciseMinutes || 0}
             </div>
             <div class="metric">
-              <strong>Average Per Day:</strong> ${summaryData.activityLevel.averagePerDay} minutes
+              <strong>Average Per Day:</strong> ${summaryData.activityLevel?.averagePerDay || 0} minutes
             </div>
             <div class="metric">
-              <strong>Exercise Sessions:</strong> ${summaryData.activityLevel.sessionsRecorded}
+              <strong>Exercise Sessions:</strong> ${summaryData.activityLevel?.sessionsRecorded || 0}
             </div>
           </div>
 
           <div class="section">
             <h2>ADVERSE EVENTS</h2>
             <div class="metric">
-              <strong>Reported Side Effects:</strong> ${summaryData.adverseEvents.reportedSideEffects}
+              <strong>Reported Side Effects:</strong> ${summaryData.adverseEvents?.reportedSideEffects || 0}
             </div>
             <div class="metric">
-              <strong>Average Severity:</strong> ${summaryData.adverseEvents.averageSeverity}/10 
-              <span class="assessment">(${summaryData.adverseEvents.severityCategory})</span>
+              <strong>Average Severity:</strong> ${summaryData.adverseEvents?.averageSeverity || 0}/10 
+              <span class="assessment">(${summaryData.adverseEvents?.severityCategory || 'No Data'})</span>
             </div>
           </div>
 
           <div class="section">
             <h2>CLINICAL OBSERVATIONS</h2>
-            ${summaryData.clinicalObservations.map((obs: string) => `
+            ${summaryData.clinicalObservations?.map((obs: string) => `
               <div class="observation">• ${obs}</div>
-            `).join('')}
+            `).join('') || '<div class="observation">No observations available</div>'}
           </div>
 
           <div class="footer">
@@ -383,7 +383,7 @@ const MedicalSummary = ({ timeRange }: MedicalSummaryProps) => {
       <Card className="bg-gray-800 p-6">
         <h3 className="text-lg font-semibold text-foreground mb-4">Current Medication Regimen</h3>
         <div className="space-y-2">
-          {summaryData.currentRegimen.map((med: any, index: number) => (
+          {summaryData.currentRegimen?.map((med: any, index: number) => (
             <div key={index} className="flex justify-between items-center p-3 bg-gray-700 rounded">
               <div>
                 <span className="font-medium text-foreground">{med.medication}</span>
@@ -391,7 +391,7 @@ const MedicalSummary = ({ timeRange }: MedicalSummaryProps) => {
               </div>
               <span className="text-sm text-champagne">{med.indication}</span>
             </div>
-          ))}
+          )) || <div className="text-muted-foreground">No medications recorded</div>}
         </div>
       </Card>
 
@@ -402,8 +402,8 @@ const MedicalSummary = ({ timeRange }: MedicalSummaryProps) => {
             <TrendingUp className="text-blue-400" size={20} />
             <span className="text-sm text-muted-foreground">Mood Stability</span>
           </div>
-          <div className="text-2xl font-bold text-gold">{summaryData.symptomStability.averageMoodScore}/10</div>
-          <div className="text-sm text-muted-foreground">{summaryData.symptomStability.stabilityAssessment}</div>
+          <div className="text-2xl font-bold text-gold">{summaryData.symptomStability?.averageMoodScore || 0}/10</div>
+          <div className="text-sm text-muted-foreground">{summaryData.symptomStability?.stabilityAssessment || 'No Data'}</div>
         </Card>
 
         <Card className="bg-gray-800 p-4">
@@ -411,8 +411,8 @@ const MedicalSummary = ({ timeRange }: MedicalSummaryProps) => {
             <AlertTriangle className="text-yellow-400" size={20} />
             <span className="text-sm text-muted-foreground">Side Effects</span>
           </div>
-          <div className="text-2xl font-bold text-gold">{summaryData.adverseEvents.averageSeverity}/10</div>
-          <div className="text-sm text-muted-foreground">{summaryData.adverseEvents.severityCategory}</div>
+          <div className="text-2xl font-bold text-gold">{summaryData.adverseEvents?.averageSeverity || 0}/10</div>
+          <div className="text-sm text-muted-foreground">{summaryData.adverseEvents?.severityCategory || 'No Data'}</div>
         </Card>
 
         <Card className="bg-gray-800 p-4">
@@ -420,8 +420,8 @@ const MedicalSummary = ({ timeRange }: MedicalSummaryProps) => {
             <Calendar className="text-green-400" size={20} />
             <span className="text-sm text-muted-foreground">Sleep Average</span>
           </div>
-          <div className="text-2xl font-bold text-gold">{summaryData.sleepPatterns.averageHours}h</div>
-          <div className="text-sm text-muted-foreground">{summaryData.sleepPatterns.assessment}</div>
+          <div className="text-2xl font-bold text-gold">{summaryData.sleepPatterns?.averageHours || 0}h</div>
+          <div className="text-sm text-muted-foreground">{summaryData.sleepPatterns?.assessment || 'No Data'}</div>
         </Card>
 
         <Card className="bg-gray-800 p-4">
@@ -429,8 +429,8 @@ const MedicalSummary = ({ timeRange }: MedicalSummaryProps) => {
             <CheckCircle className="text-purple-400" size={20} />
             <span className="text-sm text-muted-foreground">Blood Sugar</span>
           </div>
-          <div className="text-2xl font-bold text-gold">{summaryData.metabolicHealth.averageBloodSugar}</div>
-          <div className="text-sm text-muted-foreground">{summaryData.metabolicHealth.assessment}</div>
+          <div className="text-2xl font-bold text-gold">{summaryData.metabolicHealth?.averageBloodSugar || 0}</div>
+          <div className="text-sm text-muted-foreground">{summaryData.metabolicHealth?.assessment || 'No Data'}</div>
         </Card>
       </div>
 
@@ -438,12 +438,12 @@ const MedicalSummary = ({ timeRange }: MedicalSummaryProps) => {
       <Card className="bg-gray-800 p-6">
         <h3 className="text-lg font-semibold text-foreground mb-4">Clinical Observations</h3>
         <div className="space-y-2">
-          {summaryData.clinicalObservations.map((observation: string, index: number) => (
+          {summaryData.clinicalObservations?.map((observation: string, index: number) => (
             <div key={index} className="flex items-start gap-2 p-3 bg-blue-100/10 border-l-4 border-blue-400 rounded">
               <span className="text-blue-400 mt-1">•</span>  
               <span className="text-foreground">{observation}</span>
             </div>
-          ))}
+          )) || <div className="text-muted-foreground">No observations available</div>}
         </div>
       </Card>
     </div>
