@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,8 @@ import MedicationHistory from './MedicationHistory';
 import AddNoteDialog from './AddNoteDialog';
 import AddMedicationDialog from './AddMedicationDialog';
 import SupplementTracker from './SupplementTracker';
+import MoodTracker from './MoodTracker';
+import HealthMetrics from './HealthMetrics';
 
 interface MedicationDose {
   id: string;
@@ -35,6 +36,8 @@ const MedicationTracker = () => {
   const { toast } = useToast();
   const [showHistory, setShowHistory] = useState(false);
   const [showSupplements, setShowSupplements] = useState(false);
+  const [showMoodTracker, setShowMoodTracker] = useState(false);
+  const [showHealthMetrics, setShowHealthMetrics] = useState(false);
   const [noteDialogOpen, setNoteDialogOpen] = useState(false);
   const [addMedDialogOpen, setAddMedDialogOpen] = useState(false);
   const [selectedMedication, setSelectedMedication] = useState<string | null>(null);
@@ -219,6 +222,18 @@ const MedicationTracker = () => {
     );
   }
 
+  if (showMoodTracker) {
+    return (
+      <MoodTracker onBack={() => setShowMoodTracker(false)} />
+    );
+  }
+
+  if (showHealthMetrics) {
+    return (
+      <HealthMetrics onBack={() => setShowHealthMetrics(false)} />
+    );
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between mb-6">
@@ -226,7 +241,23 @@ const MedicationTracker = () => {
           <Bell className="text-hot-pink" size={24} />
           <h2 className="text-2xl font-semibold text-foreground">Today's Medications</h2>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          <Button
+            onClick={() => setShowMoodTracker(true)}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <Plus size={18} />
+            Mood
+          </Button>
+          <Button
+            onClick={() => setShowHealthMetrics(true)}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <Plus size={18} />
+            Health
+          </Button>
           <Button
             onClick={() => setShowSupplements(true)}
             variant="outline"
