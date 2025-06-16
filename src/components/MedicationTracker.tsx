@@ -1,8 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bell, Plus, History, Clock, Check, X, Pill, List, Download } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Bell, Plus, History, Check, Pill, List, Download, Sun, Moon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import AddMedicationDialog from './AddMedicationDialog';
 import MedicationHistory from './MedicationHistory';
@@ -12,11 +14,12 @@ import MedicationList from './MedicationList';
 interface Medication {
   id: string;
   name: string;
-  time: string;
   instructions: string;
   type: 'cobenfy' | 'latuda' | 'seroquel' | 'caplyta' | 'lantus' | 'custom';
   dosage: string;
   frequency: string;
+  takeMorning: boolean;
+  takeEvening: boolean;
 }
 
 interface MedicationLog {
@@ -24,6 +27,7 @@ interface MedicationLog {
   medicationId: string;
   medicationName: string;
   timestamp: string;
+  timeOfDay: 'morning' | 'evening';
   taken: boolean;
   notes?: string;
 }
@@ -32,7 +36,6 @@ const MedicationTracker = () => {
   const [medications, setMedications] = useState<Medication[]>([]);
   const [medicationLog, setMedicationLog] = useState<MedicationLog[]>([]);
   const [addMedicationOpen, setAddMedicationOpen] = useState(false);
-  const [showHistory, setShowHistory] = useState(false);
   const [activeTab, setActiveTab] = useState('current');
   const { toast } = useToast();
 
@@ -40,12 +43,14 @@ const MedicationTracker = () => {
     const savedMedications = localStorage.getItem('medications');
     if (savedMedications) {
       const parsedMedications = JSON.parse(savedMedications);
-      // Ensure all medications have a frequency property
-      const medicationsWithFrequency = parsedMedications.map((med: any) => ({
+      // Ensure all medications have the new properties
+      const medicationsWithTimeOfDay = parsedMedications.map((med: any) => ({
         ...med,
-        frequency: med.frequency || 'Daily'
+        frequency: med.frequency || 'Daily',
+        takeMorning: med.takeMorning !== undefined ? med.takeMorning : true,
+        takeEvening: med.takeEvening !== undefined ? med.takeEvening : false
       }));
-      setMedications(medicationsWithFrequency);
+      setMedications(medicationsWithTimeOfDay);
     }
 
     const savedMedicationLog = localStorage.getItem('medicationLog');
@@ -66,47 +71,59 @@ const MedicationTracker = () => {
     const newMedication = { 
       ...medication, 
       id: Date.now().toString(),
-      frequency: medication.frequency || 'Daily'
+      frequency: medication.frequency || 'Daily',
+      takeMorning: true,
+      takeEvening: false
     };
     setMedications(prev => [...prev, newMedication]);
     setAddMedicationOpen(false);
   };
 
-  const logMedication = (medication: Medication) => {
+  const handleMedicationCheck = (medication: Medication, timeOfDay: 'morning' | 'evening', checked: boolean) => {
     const now = new Date();
-    const newLog: MedicationLog = {
-      id: Date.now().toString(),
-      medicationId: medication.id,
-      medicationName: medication.name,
-      timestamp: now.toISOString(),
-      taken: true,
-    };
-    setMedicationLog(prev => [newLog, ...prev]);
+    const today = now.toDateString();
+    
+    // Check if already logged today for this time
+    const existingLog = medicationLog.find(log => 
+      log.medicationId === medication.id && 
+      log.timeOfDay === timeOfDay &&
+      new Date(log.timestamp).toDateString() === today
+    );
+
+    if (existingLog) {
+      // Update existing log
+      const updatedLog = medicationLog.map(log =>
+        log.id === existingLog.id ? { ...log, taken: checked } : log
+      );
+      setMedicationLog(updatedLog);
+    } else if (checked) {
+      // Create new log entry
+      const newLog: MedicationLog = {
+        id: Date.now().toString(),
+        medicationId: medication.id,
+        medicationName: medication.name,
+        timestamp: now.toISOString(),
+        timeOfDay,
+        taken: true,
+      };
+      setMedicationLog(prev => [newLog, ...prev]);
+    }
+
     toast({
-      title: "Medication logged! 🔔",
-      description: `${medication.name} taken at ${now.toLocaleTimeString()}`,
+      title: checked ? "Medication logged! 💊" : "Medication unmarked",
+      description: `${medication.name} ${checked ? 'taken' : 'unmarked'} for ${timeOfDay}`,
     });
   };
 
-  const markMissed = (medication: Medication) => {
-    const now = new Date();
-    const newLog: MedicationLog = {
-      id: Date.now().toString(),
-      medicationId: medication.id,
-      medicationName: medication.name,
-      timestamp: now.toISOString(),
-      taken: false,
-    };
-    setMedicationLog(prev => [newLog, ...prev]);
-    toast({
-      title: "Medication marked missed",
-      description: `You missed ${medication.name} at ${now.toLocaleTimeString()}`,
-    });
+  const getMedicationStatus = (medicationId: string, timeOfDay: 'morning' | 'evening') => {
+    const today = new Date().toDateString();
+    const log = medicationLog.find(log => 
+      log.medicationId === medicationId && 
+      log.timeOfDay === timeOfDay &&
+      new Date(log.timestamp).toDateString() === today
+    );
+    return log?.taken || false;
   };
-
-  const todayLogs = medicationLog.filter(log => 
-    new Date(log.timestamp).toDateString() === new Date().toDateString()
-  );
 
   const exportToPDF = () => {
     const printWindow = window.open('', '_blank');
@@ -143,8 +160,8 @@ const MedicationTracker = () => {
                 <tr>
                   <th>Medication</th>
                   <th>Dosage</th>
-                  <th>Time</th>
-                  <th>Frequency</th>
+                  <th>Morning</th>
+                  <th>Evening</th>
                   <th>Instructions</th>
                 </tr>
               </thead>
@@ -153,8 +170,8 @@ const MedicationTracker = () => {
                   <tr>
                     <td>${med.name}</td>
                     <td>${med.dosage}</td>
-                    <td>${med.time}</td>
-                    <td>${med.frequency}</td>
+                    <td>${med.takeMorning ? 'Yes' : 'No'}</td>
+                    <td>${med.takeEvening ? 'Yes' : 'No'}</td>
                     <td>${med.instructions}</td>
                   </tr>
                 `).join('')}
@@ -170,6 +187,7 @@ const MedicationTracker = () => {
                   <th>Date</th>
                   <th>Time</th>
                   <th>Medication</th>
+                  <th>Time of Day</th>
                   <th>Status</th>
                 </tr>
               </thead>
@@ -179,6 +197,7 @@ const MedicationTracker = () => {
                     <td>${new Date(log.timestamp).toLocaleDateString()}</td>
                     <td>${new Date(log.timestamp).toLocaleTimeString()}</td>
                     <td>${log.medicationName}</td>
+                    <td>${log.timeOfDay}</td>
                     <td>${log.taken ? 'Taken' : 'Missed'}</td>
                   </tr>
                 `).join('')}
@@ -198,16 +217,6 @@ const MedicationTracker = () => {
       description: "Your medication report is ready to print or save as PDF",
     });
   };
-
-  if (showHistory) {
-    return (
-      <MedicationHistory 
-        medications={medications}
-        medicationLog={medicationLog}
-        onBack={() => setShowHistory(false)}
-      />
-    );
-  }
 
   return (
     <div className="space-y-4">
@@ -260,50 +269,48 @@ const MedicationTracker = () => {
             {medications.length === 0 ? (
               <p className="text-muted-foreground text-center py-4">No medications added yet</p>
             ) : (
-              <div className="space-y-3">
-                {medications.map((medication) => {
-                  const lastLog = todayLogs.find(log => log.medicationId === medication.id);
-                  const taken = lastLog?.taken ?? false;
-
-                  return (
-                    <Card key={medication.id} className="bg-gray-700">
-                      <div className="flex items-center justify-between p-3">
-                        <div>
-                          <h3 className="text-lg font-semibold text-foreground">{medication.name}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            Time: {medication.time}, Dosage: {medication.dosage}
-                          </p>
-                          <p className="text-sm text-champagne">{medication.instructions}</p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {taken ? (
-                            <Button variant="outline" disabled>
-                              <Check size={16} className="mr-2" />
-                              Taken
-                            </Button>
-                          ) : (
-                            <>
-                              <Button
-                                onClick={() => logMedication(medication)}
-                                className="bg-green-500 text-black hover:bg-green-500/90"
-                              >
-                                <Clock size={16} className="mr-2" />
-                                Log Taken
-                              </Button>
-                              <Button
-                                onClick={() => markMissed(medication)}
-                                className="bg-red-500 text-black hover:bg-red-500/90"
-                              >
-                                <X size={16} className="mr-2" />
-                                Mark Missed
-                              </Button>
-                            </>
-                          )}
-                        </div>
+              <div className="space-y-4">
+                {medications.map((medication) => (
+                  <Card key={medication.id} className="bg-gray-700 p-4">
+                    <div className="flex flex-col space-y-3">
+                      <div>
+                        <h3 className="text-lg font-semibold text-foreground">{medication.name}</h3>
+                        <p className="text-sm text-muted-foreground">Dosage: {medication.dosage}</p>
+                        <p className="text-sm text-champagne">{medication.instructions}</p>
                       </div>
-                    </Card>
-                  );
-                })}
+                      
+                      <div className="flex flex-col sm:flex-row gap-4">
+                        {medication.takeMorning && (
+                          <div className="flex items-center space-x-3 p-3 bg-gray-600 rounded-lg">
+                            <Sun className="text-yellow-400" size={20} />
+                            <span className="text-foreground font-medium">Morning</span>
+                            <Checkbox
+                              checked={getMedicationStatus(medication.id, 'morning')}
+                              onCheckedChange={(checked) => 
+                                handleMedicationCheck(medication, 'morning', checked as boolean)
+                              }
+                              className="ml-auto"
+                            />
+                          </div>
+                        )}
+                        
+                        {medication.takeEvening && (
+                          <div className="flex items-center space-x-3 p-3 bg-gray-600 rounded-lg">
+                            <Moon className="text-blue-400" size={20} />
+                            <span className="text-foreground font-medium">Evening</span>
+                            <Checkbox
+                              checked={getMedicationStatus(medication.id, 'evening')}
+                              onCheckedChange={(checked) => 
+                                handleMedicationCheck(medication, 'evening', checked as boolean)
+                              }
+                              className="ml-auto"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </Card>
+                ))}
               </div>
             )}
           </Card>

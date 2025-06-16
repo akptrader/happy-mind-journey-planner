@@ -5,14 +5,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Plus } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Plus, Sun, Moon } from 'lucide-react';
 
 interface MedicationData {
   name: string;
-  time: string;
   instructions: string;
   type: 'cobenfy' | 'latuda' | 'seroquel' | 'caplyta' | 'lantus' | 'custom';
-  dosage?: string;
+  dosage: string;
+  frequency: string;
+  takeMorning: boolean;
+  takeEvening: boolean;
 }
 
 interface AddMedicationDialogProps {
@@ -24,33 +27,39 @@ interface AddMedicationDialogProps {
 const AddMedicationDialog = ({ open, onOpenChange, onSubmit }: AddMedicationDialogProps) => {
   const [formData, setFormData] = useState<MedicationData>({
     name: '',
-    time: '',
     instructions: '',
     type: 'custom',
-    dosage: ''
+    dosage: '',
+    frequency: 'Daily',
+    takeMorning: true,
+    takeEvening: false
   });
 
   const handleSubmit = () => {
-    if (!formData.name || !formData.time) {
+    if (!formData.name || (!formData.takeMorning && !formData.takeEvening)) {
       return;
     }
     onSubmit(formData);
     setFormData({
       name: '',
-      time: '',
       instructions: '',
       type: 'custom',
-      dosage: ''
+      dosage: '',
+      frequency: 'Daily',
+      takeMorning: true,
+      takeEvening: false
     });
   };
 
   const handleCancel = () => {
     setFormData({
       name: '',
-      time: '',
       instructions: '',
       type: 'custom',
-      dosage: ''
+      dosage: '',
+      frequency: 'Daily',
+      takeMorning: true,
+      takeEvening: false
     });
     onOpenChange(false);
   };
@@ -87,13 +96,32 @@ const AddMedicationDialog = ({ open, onOpenChange, onSubmit }: AddMedicationDial
           </div>
 
           <div>
-            <Label htmlFor="time">Time</Label>
-            <Input
-              id="time"
-              type="time"
-              value={formData.time}
-              onChange={(e) => setFormData(prev => ({ ...prev, time: e.target.value }))}
-            />
+            <Label>When do you take this medication?</Label>
+            <div className="flex flex-col gap-3 mt-2">
+              <div className="flex items-center space-x-3 p-3 bg-muted rounded-lg">
+                <Sun className="text-yellow-400" size={20} />
+                <span className="text-foreground font-medium">Morning</span>
+                <Checkbox
+                  checked={formData.takeMorning}
+                  onCheckedChange={(checked) => 
+                    setFormData(prev => ({ ...prev, takeMorning: checked as boolean }))
+                  }
+                  className="ml-auto"
+                />
+              </div>
+              
+              <div className="flex items-center space-x-3 p-3 bg-muted rounded-lg">
+                <Moon className="text-blue-400" size={20} />
+                <span className="text-foreground font-medium">Evening</span>
+                <Checkbox
+                  checked={formData.takeEvening}
+                  onCheckedChange={(checked) => 
+                    setFormData(prev => ({ ...prev, takeEvening: checked as boolean }))
+                  }
+                  className="ml-auto"
+                />
+              </div>
+            </div>
           </div>
 
           <div>
@@ -112,7 +140,7 @@ const AddMedicationDialog = ({ open, onOpenChange, onSubmit }: AddMedicationDial
             </Button>
             <Button 
               onClick={handleSubmit}
-              disabled={!formData.name || !formData.time}
+              disabled={!formData.name || (!formData.takeMorning && !formData.takeEvening)}
               className="bg-hot-pink text-black hover:bg-hot-pink/90"
             >
               Add Medication
