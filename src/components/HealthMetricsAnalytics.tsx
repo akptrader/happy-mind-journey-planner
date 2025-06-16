@@ -2,207 +2,195 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, ComposedChart, Bar } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, AreaChart, Area, BarChart, Bar } from 'recharts';
 import { Activity, Heart, Moon, TrendingUp } from 'lucide-react';
 
 interface HealthMetricsAnalyticsProps {
   timeRange: string;
 }
 
+interface HealthMetric {
+  id: string;
+  timestamp: string;
+  type: 'heart-rate-variability' | 'sleep' | 'blood-pressure' | 'weight';
+  value: number;
+  unit: string;
+  notes?: string;
+  additionalData?: Record<string, any>;
+}
+
 const HealthMetricsAnalytics = ({ timeRange }: HealthMetricsAnalyticsProps) => {
-  const [metricsData, setMetricsData] = useState<any[]>([]);
-  const [metricTypes, setMetricTypes] = useState<string[]>([]);
+  const [metrics, setMetrics] = useState<HealthMetric[]>([]);
+  const [trendData, setTrendData] = useState<any[]>([]);
+  const [averageData, setAverageData] = useState<any[]>([]);
 
   useEffect(() => {
     const loadData = () => {
-      const healthMetrics = JSON.parse(localStorage.getItem('healthMetrics') || '[]');
+      const healthMetrics = JSON.parse(localStorage.getItem('healthMetrics') || '[]') as HealthMetric[];
       
       const daysToCheck = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 90;
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - daysToCheck);
 
-      const recentMetrics = healthMetrics.filter((metric: any) => 
+      const recentMetrics = healthMetrics.filter((metric: HealthMetric) => 
         new Date(metric.timestamp) >= startDate
       );
 
-      // Get unique metric types
-      const types = [...new Set(recentMetrics.map((m: any) => m.type))];
-      setMetricTypes(types);
+      setMetrics(recentMetrics);
 
-      // Group by date and metric type
-      const dataByDate: Record<string, any> = {};
+      // Generate trend data for each metric type
+      const metricTypes = ['heart-rate-variability', 'sleep', 'blood-pressure', 'weight'] as const;
+      const trends = [];
       
       for (let i = daysToCheck - 1; i >= 0; i--) {
         const date = new Date();
         date.setDate(date.getDate() - i);
-        const dateStr = date.toISOString().split('T')[0];
-        const displayDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const dateStr = date.toDateString();
         
-        dataByDate[dateStr] = { date: displayDate };
+        const dayEntry: any = {
+          date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+        };
         
-        types.forEach(type => {
-          const dayMetrics = recentMetrics.filter((metric: any) => 
-            new Date(metric.timestamp).toISOString().split('T')[0] === dateStr && 
-            metric.type === type
+        metricTypes.forEach(type => {
+          const dayMetrics = recentMetrics.filter((metric: HealthMetric) => 
+            new Date(metric.timestamp).toDateString() === dateStr && metric.type === type
           );
           
           if (dayMetrics.length > 0) {
-            if (type === 'blood-pressure') {
-              // For blood pressure, use systolic value
-              const avgSystolic = dayMetrics.reduce((sum: number, m: any) => 
-                sum + (m.additionalData?.systolic || m.value), 0) / dayMetrics.length;
-              dataByDate[dateStr][type] = Math.round(avgSystolic);
-            } else {
-              const avgValue = dayMetrics.reduce((sum: number, m: any) => sum + m.value, 0) / dayMetrics.length;
-              dataByDate[dateStr][type] = Math.round(avgValue * 100) / 100;
-            }
+            const avgValue = dayMetrics.reduce((sum: number, metric: HealthMetric) => sum + metric.value, 0) / dayMetrics.length;
+            dayEntry[type] = Math.round(avgValue * 10) / 10;
+          } else {
+            dayEntry[type] = null;
           }
         });
+        
+        trends.push(dayEntry);
       }
+      setTrendData(trends);
 
-      const chartData = Object.values(dataByDate);
-      setMetricsData(chartData);
+      // Calculate averages by type
+      const averages = metricTypes.map(type => {
+        const typeMetrics = recentMetrics.filter((metric: HealthMetric) => metric.type === type);
+        if (typeMetrics.length === 0) return null;
+        
+        const average = typeMetrics.reduce((sum: number, metric: HealthMetric) => sum + metric.value, 0) / typeMetrics.length;
+        const unit = typeMetrics[0]?.unit || '';
+        
+        return {
+          type: type.replace('-', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
+          average: Math.round(average * 10) / 10,
+          unit,
+          count: typeMetrics.length
+        };
+      }).filter(Boolean);
+      
+      setAverageData(averages);
     };
 
     loadData();
   }, [timeRange]);
 
+  const chartConfig = {
+    'heart-rate-variability': {
+      label: "HRV",
+      color: "#ef4444",
+    },
+    sleep: {
+      label: "Sleep",
+      color: "#3b82f6",
+    },
+    'blood-pressure': {
+      label: "BP",
+      color: "#8b5cf6",
+    },
+    weight: {
+      label: "Weight",
+      color: "#10b981",
+    },
+  };
+
   const getMetricIcon = (type: string) => {
-    switch (type) {
-      case 'heart-rate-variability':
-        return <Heart className="text-red-500" size={16} />;
-      case 'sleep':
-        return <Moon className="text-blue-500" size={16} />;
-      case 'blood-pressure':
-        return <Activity className="text-purple-500" size={16} />;
+    switch (type.toLowerCase()) {
+      case 'heart rate variability':
+        return <Heart className="text-red-500" size={20} />;
+      case 'sleep duration':
+        return <Moon className="text-blue-500" size={20} />;
+      case 'blood pressure':
+        return <Activity className="text-purple-500" size={20} />;
       case 'weight':
-        return <TrendingUp className="text-green-500" size={16} />;
+        return <TrendingUp className="text-green-500" size={20} />;
       default:
-        return <Activity className="text-gray-500" size={16} />;
+        return <Activity className="text-gray-500" size={20} />;
     }
   };
-
-  const getMetricColor = (type: string) => {
-    switch (type) {
-      case 'heart-rate-variability':
-        return '#ef4444';
-      case 'sleep':
-        return '#3b82f6';
-      case 'blood-pressure':
-        return '#8b5cf6';
-      case 'weight':
-        return '#10b981';
-      default:
-        return '#6b7280';
-    }
-  };
-
-  const formatMetricName = (type: string) => {
-    return type.split('-').map(word => 
-      word.charAt(0).toUpperCase() + word.slice(1)
-    ).join(' ');
-  };
-
-  const chartConfig = metricTypes.reduce((config: any, type) => {
-    config[type] = {
-      label: formatMetricName(type),
-      color: getMetricColor(type),
-    };
-    return config;
-  }, {});
-
-  if (metricTypes.length === 0) {
-    return (
-      <Card className="medication-card bg-gray-800 p-6 text-center">
-        <Activity className="text-hot-pink mx-auto mb-4" size={48} />
-        <h3 className="text-lg font-semibold text-foreground mb-2">No Health Metrics Data</h3>
-        <p className="text-muted-foreground">Start logging health metrics to see your trends and analytics here.</p>
-      </Card>
-    );
-  }
 
   return (
     <div className="space-y-6">
-      {/* All Metrics Combined */}
+      {/* Metrics Trend */}
       <Card className="medication-card bg-gray-800 p-6">
         <div className="flex items-center gap-2 mb-4">
           <Activity className="text-hot-pink" size={20} />
-          <h3 className="text-lg font-semibold text-foreground">Health Metrics Trends</h3>
+          <h3 className="text-lg font-semibold text-foreground">Health Metrics Trend</h3>
         </div>
         <ChartContainer config={chartConfig} className="h-80">
-          <ComposedChart data={metricsData}>
+          <LineChart data={trendData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
             <XAxis dataKey="date" stroke="#9ca3af" />
             <YAxis stroke="#9ca3af" />
             <ChartTooltip content={<ChartTooltipContent />} />
-            {metricTypes.map((type, index) => (
-              <Line
-                key={type}
-                type="monotone"
-                dataKey={type}
-                stroke={getMetricColor(type)}
-                strokeWidth={2}
-                dot={{ fill: getMetricColor(type), strokeWidth: 2, r: 3 }}
-                connectNulls={false}
-              />
-            ))}
-          </ComposedChart>
+            <Line 
+              type="monotone" 
+              dataKey="heart-rate-variability" 
+              stroke="#ef4444" 
+              strokeWidth={2}
+              connectNulls={false}
+              name="HRV (ms)"
+            />
+            <Line 
+              type="monotone" 
+              dataKey="sleep" 
+              stroke="#3b82f6" 
+              strokeWidth={2}
+              connectNulls={false}
+              name="Sleep (hrs)"
+            />
+            <Line 
+              type="monotone" 
+              dataKey="weight" 
+              stroke="#10b981" 
+              strokeWidth={2}
+              connectNulls={false}
+              name="Weight (lbs)"
+            />
+          </LineChart>
         </ChartContainer>
       </Card>
 
-      {/* Individual Metric Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {metricTypes.map(type => {
-          const typeData = metricsData.filter(d => d[type] !== undefined);
-          const latestValue = typeData.length > 0 ? typeData[typeData.length - 1][type] : null;
-          const previousValue = typeData.length > 1 ? typeData[typeData.length - 2][type] : null;
-          const trend = latestValue && previousValue ? latestValue - previousValue : 0;
-
-          return (
-            <Card key={type} className="medication-card bg-gray-800 p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  {getMetricIcon(type)}
-                  <h4 className="font-semibold text-foreground">{formatMetricName(type)}</h4>
+      {/* Average Values */}
+      {averageData.length > 0 && (
+        <Card className="medication-card bg-gray-800 p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <TrendingUp className="text-hot-pink" size={20} />
+            <h3 className="text-lg font-semibold text-foreground">Average Values</h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {averageData.map((item, index) => (
+              <Card key={index} className="bg-gray-700 p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  {getMetricIcon(item.type)}
+                  <span className="font-medium text-foreground">{item.type}</span>
                 </div>
-                {trend !== 0 && (
-                  <div className={`flex items-center gap-1 text-sm ${trend > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                    <TrendingUp 
-                      size={14} 
-                      className={trend < 0 ? 'rotate-180' : ''}
-                    />
-                    {Math.abs(trend).toFixed(1)}
-                  </div>
-                )}
-              </div>
-              
-              {latestValue !== null && (
-                <div className="mb-4">
-                  <span className="text-2xl font-bold text-gold">{latestValue}</span>
-                  <span className="text-sm text-muted-foreground ml-2">
-                    {type === 'heart-rate-variability' && 'ms'}
-                    {type === 'sleep' && 'hours'}
-                    {type === 'blood-pressure' && 'mmHg (systolic)'}
-                    {type === 'weight' && 'lbs'}
-                  </span>
+                <div className="text-2xl font-bold text-gold">
+                  {item.average}{item.unit}
                 </div>
-              )}
-
-              <ChartContainer config={chartConfig} className="h-32">
-                <LineChart data={typeData}>
-                  <Line
-                    type="monotone"
-                    dataKey={type}
-                    stroke={getMetricColor(type)}
-                    strokeWidth={2}
-                    dot={false}
-                  />
-                </LineChart>
-              </ChartContainer>
-            </Card>
-          );
-        })}
-      </div>
+                <div className="text-sm text-muted-foreground">
+                  {item.count} recordings
+                </div>
+              </Card>
+            ))}
+          </div>
+        </Card>
+      )}
     </div>
   );
 };

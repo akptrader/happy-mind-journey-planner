@@ -4,52 +4,65 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Calendar, Clock, StickyNote } from 'lucide-react';
 
-interface MedicationRecord {
+interface Medication {
+  id: string;
+  name: string;
+  dosage: string;
+  frequency: string;
+  notes?: string;
+}
+
+interface MedicationLog {
   id: string;
   medicationId: string;
-  name: string;
-  takenAt: string;
-  note?: string;
-  type: 'cobenfy' | 'latuda' | 'seroquel' | 'caplyta' | 'lantus' | 'custom';
-  dosage?: string;
+  timestamp: string;
 }
 
 interface MedicationHistoryProps {
-  history: MedicationRecord[];
+  medications: Medication[];
+  medicationLog: MedicationLog[];
   onBack: () => void;
 }
 
-const MedicationHistory = ({ history, onBack }: MedicationHistoryProps) => {
+const MedicationHistory = ({ medications, medicationLog, onBack }: MedicationHistoryProps) => {
   const [selectedDate, setSelectedDate] = useState<string>('');
 
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'cobenfy':
-        return 'border-l-hot-pink bg-gray-800';
-      case 'latuda':
-        return 'border-l-gold bg-gray-800';
-      case 'seroquel':
-        return 'border-l-purple-500 bg-gray-800';
-      case 'caplyta':
-        return 'border-l-blue-500 bg-gray-800';
-      case 'lantus':
-        return 'border-l-green-500 bg-gray-800';
-      case 'custom':
-        return 'border-l-champagne-dark bg-gray-800';
-      default:
-        return 'border-l-gray-300 bg-gray-800';
-    }
+  const getTypeColor = (medicationId: string) => {
+    const medication = medications.find(med => med.id === medicationId);
+    if (!medication) return 'border-l-gray-300 bg-gray-800';
+    
+    // Simple color assignment based on medication name
+    const name = medication.name.toLowerCase();
+    if (name.includes('cobenfy')) return 'border-l-hot-pink bg-gray-800';
+    if (name.includes('latuda')) return 'border-l-gold bg-gray-800';
+    if (name.includes('seroquel')) return 'border-l-purple-500 bg-gray-800';
+    if (name.includes('caplyta')) return 'border-l-blue-500 bg-gray-800';
+    if (name.includes('lantus')) return 'border-l-green-500 bg-gray-800';
+    return 'border-l-champagne-dark bg-gray-800';
   };
 
+  // Create enriched records by joining medications and logs
+  const enrichedHistory = medicationLog.map(log => {
+    const medication = medications.find(med => med.id === log.medicationId);
+    return {
+      id: log.id,
+      medicationId: log.medicationId,
+      name: medication?.name || 'Unknown Medication',
+      takenAt: log.timestamp,
+      dosage: medication?.dosage,
+      type: 'custom' as const
+    };
+  });
+
   // Group history by date
-  const groupedHistory = history.reduce((acc, record) => {
+  const groupedHistory = enrichedHistory.reduce((acc, record) => {
     const date = new Date(record.takenAt).toDateString();
     if (!acc[date]) {
       acc[date] = [];
     }
     acc[date].push(record);
     return acc;
-  }, {} as Record<string, MedicationRecord[]>);
+  }, {} as Record<string, typeof enrichedHistory>);
 
   const dates = Object.keys(groupedHistory).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
   const filteredDates = selectedDate ? [selectedDate] : dates;
@@ -117,7 +130,7 @@ const MedicationHistory = ({ history, onBack }: MedicationHistoryProps) => {
             {groupedHistory[date]
               .sort((a, b) => new Date(b.takenAt).getTime() - new Date(a.takenAt).getTime())
               .map(record => (
-                <Card key={record.id} className={`medication-card border-l-4 ${getTypeColor(record.type)}`}>
+                <Card key={record.id} className={`medication-card border-l-4 ${getTypeColor(record.medicationId)}`}>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
@@ -132,12 +145,6 @@ const MedicationHistory = ({ history, onBack }: MedicationHistoryProps) => {
                           </span>
                         )}
                       </div>
-                      {record.note && (
-                        <div className="flex items-start gap-2 ml-7">
-                          <StickyNote size={14} className="text-champagne mt-0.5" />
-                          <p className="text-sm text-champagne">{record.note}</p>
-                        </div>
-                      )}
                     </div>
                   </div>
                 </Card>

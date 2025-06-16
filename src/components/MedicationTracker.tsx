@@ -65,7 +65,14 @@ const MedicationTracker = () => {
     localStorage.setItem('medicationLog', JSON.stringify(medicationLog));
   }, [medicationLog]);
 
-  const addMedication = (medication: Medication) => {
+  const addMedication = (medicationData: any) => {
+    const medication = {
+      id: Date.now().toString(),
+      name: medicationData.name,
+      dosage: medicationData.dosage,
+      frequency: medicationData.frequency || 'Daily',
+      notes: medicationData.notes
+    };
     setMedications(prev => [...prev, medication]);
     setShowAddDialog(false);
     toast({
