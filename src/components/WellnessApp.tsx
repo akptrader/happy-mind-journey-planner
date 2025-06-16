@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
@@ -14,7 +13,6 @@ import DietTracker from './DietTracker';
 import HealthMetrics from './HealthMetrics';
 import Analytics from './Analytics';
 import WorkProductivityTracker from './WorkProductivityTracker';
-import QuickActions from './QuickActions';
 import { Bell, List, Heart, Calendar, Timer, Edit, Smartphone, Dumbbell, CheckSquare, Apple, TrendingUp, Activity, Briefcase } from 'lucide-react';
 import { NotificationService } from '@/services/NotificationService';
 import { useToast } from '@/hooks/use-toast';
@@ -202,9 +200,6 @@ const WellnessApp = () => {
           </Card>
         </div>
       </div>
-
-      {/* Quick Actions FAB */}
-      <QuickActions />
     </div>
   );
 };
