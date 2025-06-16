@@ -10,7 +10,9 @@ import TimingTimer from './TimingTimer';
 import EditMode from './EditMode';
 import ExerciseTracker from './ExerciseTracker';
 import PersonalTodos from './PersonalTodos';
-import { Bell, List, Heart, Calendar, Timer, Edit, Smartphone, Dumbbell, CheckSquare } from 'lucide-react';
+import DietTracker from './DietTracker';
+import Analytics from './Analytics';
+import { Bell, List, Heart, Calendar, Timer, Edit, Smartphone, Dumbbell, CheckSquare, Apple, TrendingUp } from 'lucide-react';
 import { NotificationService } from '@/services/NotificationService';
 import { useToast } from '@/hooks/use-toast';
 
@@ -104,7 +106,7 @@ const WellnessApp = () => {
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-7 mb-8">
+          <TabsList className="grid w-full grid-cols-9 mb-8">
             <TabsTrigger value="medications" className="flex items-center gap-2">
               <Bell size={18} />
               <span className="hidden sm:inline">Meds</span>
@@ -121,6 +123,10 @@ const WellnessApp = () => {
               <Dumbbell size={18} />
               <span className="hidden sm:inline">Exercise</span>
             </TabsTrigger>
+            <TabsTrigger value="diet" className="flex items-center gap-2">
+              <Apple size={18} />
+              <span className="hidden sm:inline">Diet</span>
+            </TabsTrigger>
             <TabsTrigger value="todos" className="flex items-center gap-2">
               <CheckSquare size={18} />
               <span className="hidden sm:inline">To-Do</span>
@@ -128,6 +134,10 @@ const WellnessApp = () => {
             <TabsTrigger value="selfcare" className="flex items-center gap-2">
               <Heart size={18} />
               <span className="hidden sm:inline">Care</span>
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center gap-2">
+              <TrendingUp size={18} />
+              <span className="hidden sm:inline">Analytics</span>
             </TabsTrigger>
             <TabsTrigger value="edit" className="flex items-center gap-2">
               <Edit size={18} />
@@ -151,12 +161,20 @@ const WellnessApp = () => {
             <ExerciseTracker onBack={() => setActiveTab('medications')} />
           </TabsContent>
 
+          <TabsContent value="diet" className="animate-slide-in">
+            <DietTracker />
+          </TabsContent>
+
           <TabsContent value="todos" className="animate-slide-in">
             <PersonalTodos />
           </TabsContent>
 
           <TabsContent value="selfcare" className="animate-slide-in">
             <SelfCareReminders />
+          </TabsContent>
+
+          <TabsContent value="analytics" className="animate-slide-in">
+            <Analytics onBack={() => setActiveTab('medications')} />
           </TabsContent>
 
           <TabsContent value="edit" className="animate-slide-in">
