@@ -198,20 +198,24 @@
 /* Mobile-specific improvements */
 @media (max-width: 768px) {
   .container {
-    @apply px-2;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
   }
 
   /* Improve readability on small screens */
   h1 {
-    @apply text-2xl;
+    font-size: 1.5rem;
+    line-height: 2rem;
   }
 
   h2 {
-    @apply text-xl;
+    font-size: 1.25rem;
+    line-height: 1.75rem;
   }
 
   h3 {
-    @apply text-lg;
+    font-size: 1.125rem;
+    line-height: 1.75rem;
   }
 
   /* Make charts more mobile-friendly */
@@ -221,20 +225,22 @@
 
   /* Optimize card spacing for mobile */
   .space-y-6 > * + * {
-    @apply mt-4;
+    margin-top: 1rem;
   }
 
   .space-y-4 > * + * {
-    @apply mt-3;
+    margin-top: 0.75rem;
   }
 
   /* Improve form layouts on mobile */
   .grid-cols-2 {
-    @apply grid-cols-1 gap-3;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 0.75rem;
   }
 
   /* Better button layouts for mobile */
   .flex.gap-2 {
-    @apply flex-wrap gap-2;
+    flex-wrap: wrap;
+    gap: 0.5rem;
   }
 }
