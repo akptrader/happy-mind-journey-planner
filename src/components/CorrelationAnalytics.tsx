@@ -122,7 +122,7 @@ const CorrelationAnalytics = ({ timeRange }: CorrelationAnalyticsProps) => {
       const seroquelDays = dailyData.filter(d => d.seroquelTaken && d.bloodSugar !== null);
       const nonSeroquelDays = dailyData.filter(d => !d.seroquelTaken && d.bloodSugar !== null);
       
-      if (se oquelDays.length >= 2 && nonSeroquelDays.length >= 2) {
+      if (seroquelDays.length >= 2 && nonSeroquelDays.length >= 2) {
         const avgBSWithSeroquel = seroquelDays.reduce((sum, d) => sum + d.bloodSugar, 0) / seroquelDays.length;
         const avgBSWithoutSeroquel = nonSeroquelDays.reduce((sum, d) => sum + d.bloodSugar, 0) / nonSeroquelDays.length;
         
