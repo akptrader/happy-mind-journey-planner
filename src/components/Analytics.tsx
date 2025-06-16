@@ -46,9 +46,9 @@ const Analytics = () => {
             <Activity size={18} />
             Health
           </TabsTrigger>
-          <TabsTrigger value="medication" className="flex items-center gap-2">
+          <TabsTrigger value="dosage" className="flex items-center gap-2">
             <Pill size={18} />
-            Medication
+            Dosage
           </TabsTrigger>
         </TabsList>
 
@@ -64,7 +64,7 @@ const Analytics = () => {
           <HealthMetricsAnalytics timeRange={timeRange} />
         </TabsContent>
 
-        <TabsContent value="medication" className="animate-fade-in">
+        <TabsContent value="dosage" className="animate-fade-in">
           <MedicationAnalytics timeRange={timeRange} />
         </TabsContent>
       </Tabs>

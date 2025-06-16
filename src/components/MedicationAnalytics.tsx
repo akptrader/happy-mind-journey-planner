@@ -1,188 +1,226 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
-import { Calendar, Clock, Pill } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
+import { Pill, Plus, Edit, Trash2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface MedicationAnalyticsProps {
   timeRange: string;
 }
 
 const MedicationAnalytics = ({ timeRange }: MedicationAnalyticsProps) => {
-  const [adherenceData, setAdherenceData] = useState<any[]>([]);
-  const [medicationBreakdown, setMedicationBreakdown] = useState<any[]>([]);
-  const [timeDistribution, setTimeDistribution] = useState<any[]>([]);
+  const [medications, setMedications] = useState<any[]>([]);
+  const [dosageData, setDosageData] = useState<any[]>([]);
+  const [editingMed, setEditingMed] = useState<string | null>(null);
+  const [newMedName, setNewMedName] = useState('');
+  const [newMedDosage, setNewMedDosage] = useState('');
+  const { toast } = useToast();
 
   useEffect(() => {
     const loadData = () => {
-      const medications = JSON.parse(localStorage.getItem('medications') || '[]');
-      const medicationLog = JSON.parse(localStorage.getItem('medicationLog') || '[]');
+      const storedMeds = JSON.parse(localStorage.getItem('medications') || '[]');
+      setMedications(storedMeds);
+      
+      const dosageEntries = JSON.parse(localStorage.getItem('dosageEntries') || '[]');
       
       const daysToCheck = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 90;
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - daysToCheck);
 
-      // Generate adherence data by day
-      const adherenceByDay = [];
+      // Generate dosage trend data
+      const trendData = [];
       for (let i = daysToCheck - 1; i >= 0; i--) {
         const date = new Date();
         date.setDate(date.getDate() - i);
         const dateStr = date.toDateString();
         
-        const dayLogs = medicationLog.filter((log: any) => 
-          new Date(log.timestamp).toDateString() === dateStr
-        );
-        
-        const adherenceRate = medications.length > 0 
-          ? Math.round((dayLogs.length / medications.length) * 100)
-          : 0;
-        
-        adherenceByDay.push({
-          date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-          adherence: adherenceRate,
-          taken: dayLogs.length,
-          total: medications.length
-        });
-      }
-      setAdherenceData(adherenceByDay);
-
-      // Calculate medication breakdown
-      const medBreakdown = medications.map((med: any) => {
-        const medLogs = medicationLog.filter((log: any) => 
-          log.medicationId === med.id && new Date(log.timestamp) >= startDate
-        );
-        return {
-          name: med.name,
-          taken: medLogs.length,
-          scheduled: daysToCheck * (med.frequency === 'Twice daily' ? 2 : 1),
-          adherence: Math.round((medLogs.length / (daysToCheck * (med.frequency === 'Twice daily' ? 2 : 1))) * 100)
+        const dayData: any = {
+          date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
         };
-      });
-      setMedicationBreakdown(medBreakdown);
 
-      // Calculate time distribution
-      const timeSlots = {
-        'Morning (6-12)': 0,
-        'Afternoon (12-18)': 0,
-        'Evening (18-24)': 0,
-        'Night (0-6)': 0
-      };
-
-      medicationLog.forEach((log: any) => {
-        if (new Date(log.timestamp) >= startDate) {
-          const hour = new Date(log.timestamp).getHours();
-          if (hour >= 6 && hour < 12) timeSlots['Morning (6-12)']++;
-          else if (hour >= 12 && hour < 18) timeSlots['Afternoon (12-18)']++;
-          else if (hour >= 18 && hour < 24) timeSlots['Evening (18-24)']++;
-          else timeSlots['Night (0-6)']++;
-        }
-      });
-
-      const timeData = Object.entries(timeSlots).map(([time, count]) => ({
-        time,
-        count
-      }));
-      setTimeDistribution(timeData);
+        storedMeds.forEach((med: any) => {
+          const dayEntries = dosageEntries.filter((entry: any) => 
+            entry.medicationId === med.id && 
+            new Date(entry.timestamp).toDateString() === dateStr
+          );
+          
+          if (dayEntries.length > 0) {
+            const avgDosage = dayEntries.reduce((sum: number, entry: any) => sum + entry.dosage, 0) / dayEntries.length;
+            dayData[med.name] = avgDosage;
+          }
+        });
+        
+        trendData.push(dayData);
+      }
+      
+      setDosageData(trendData);
     };
 
     loadData();
   }, [timeRange]);
 
-  const COLORS = ['#ec4899', '#ffd700', '#10b981', '#3b82f6'];
-
-  const chartConfig = {
-    adherence: {
-      label: "Adherence %",
-      color: "#ec4899",
-    },
-    taken: {
-      label: "Taken",
-      color: "#ffd700",
-    },
+  const addMedication = () => {
+    if (!newMedName.trim()) return;
+    
+    const newMed = {
+      id: Date.now().toString(),
+      name: newMedName,
+      dosage: newMedDosage,
+      time: '12:00',
+      instructions: '',
+      type: 'custom',
+      frequency: 'Daily'
+    };
+    
+    const updatedMeds = [...medications, newMed];
+    setMedications(updatedMeds);
+    localStorage.setItem('medications', JSON.stringify(updatedMeds));
+    
+    setNewMedName('');
+    setNewMedDosage('');
+    
+    toast({
+      title: "Medication added! 💊",
+      description: `${newMedName} added to your list`,
+    });
   };
+
+  const deleteMedication = (id: string) => {
+    const updatedMeds = medications.filter(med => med.id !== id);
+    setMedications(updatedMeds);
+    localStorage.setItem('medications', JSON.stringify(updatedMeds));
+    
+    const medName = medications.find(med => med.id === id)?.name;
+    toast({
+      title: "Medication removed",
+      description: `${medName} removed from your list`,
+    });
+  };
+
+  const updateMedication = (id: string, newName: string) => {
+    if (!newName.trim()) return;
+    
+    const updatedMeds = medications.map(med => 
+      med.id === id ? { ...med, name: newName } : med
+    );
+    setMedications(updatedMeds);
+    localStorage.setItem('medications', JSON.stringify(updatedMeds));
+    setEditingMed(null);
+    
+    toast({
+      title: "Medication updated! ✏️",
+      description: `Medication name changed to ${newName}`,
+    });
+  };
+
+  const chartConfig = medications.reduce((config, med, index) => {
+    const colors = ['#ec4899', '#ffd700', '#10b981', '#3b82f6', '#8b5cf6', '#f59e0b'];
+    config[med.name] = {
+      label: med.name,
+      color: colors[index % colors.length],
+    };
+    return config;
+  }, {} as any);
 
   return (
     <div className="space-y-6">
-      {/* Adherence Trend */}
+      {/* Medication Management */}
       <Card className="medication-card bg-gray-800 p-6">
         <div className="flex items-center gap-2 mb-4">
-          <Calendar className="text-hot-pink" size={20} />
-          <h3 className="text-lg font-semibold text-foreground">Daily Adherence Trend</h3>
+          <Pill className="text-hot-pink" size={20} />
+          <h3 className="text-lg font-semibold text-foreground">Manage Medications</h3>
+        </div>
+        
+        <div className="space-y-4">
+          <div className="grid grid-cols-3 gap-2">
+            <Input
+              placeholder="Medication name"
+              value={newMedName}
+              onChange={(e) => setNewMedName(e.target.value)}
+            />
+            <Input
+              placeholder="Default dosage"
+              value={newMedDosage}
+              onChange={(e) => setNewMedDosage(e.target.value)}
+            />
+            <Button onClick={addMedication} className="bg-hot-pink text-black hover:bg-hot-pink/90">
+              <Plus size={16} />
+              Add
+            </Button>
+          </div>
+          
+          <div className="space-y-2">
+            {medications.map((med) => (
+              <div key={med.id} className="flex items-center justify-between bg-gray-700 p-3 rounded">
+                {editingMed === med.id ? (
+                  <Input
+                    defaultValue={med.name}
+                    onBlur={(e) => updateMedication(med.id, e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && updateMedication(med.id, (e.target as HTMLInputElement).value)}
+                    className="flex-1 mr-2"
+                  />
+                ) : (
+                  <span className="text-foreground">{med.name}</span>
+                )}
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setEditingMed(editingMed === med.id ? null : med.id)}
+                  >
+                    <Edit size={14} />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => deleteMedication(med.id)}
+                    className="hover:bg-red-500 hover:text-white"
+                  >
+                    <Trash2 size={14} />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Card>
+
+      {/* Dosage Trends Chart */}
+      <Card className="medication-card bg-gray-800 p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Pill className="text-hot-pink" size={20} />
+          <h3 className="text-lg font-semibold text-foreground">Dosage Trends</h3>
         </div>
         <ChartContainer config={chartConfig} className="h-80">
-          <LineChart data={adherenceData}>
+          <LineChart data={dosageData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
             <XAxis dataKey="date" stroke="#9ca3af" />
             <YAxis stroke="#9ca3af" />
             <ChartTooltip content={<ChartTooltipContent />} />
-            <Line 
-              type="monotone" 
-              dataKey="adherence" 
-              stroke="#ec4899" 
-              strokeWidth={3}
-              dot={{ fill: '#ec4899', strokeWidth: 2, r: 4 }}
-            />
+            {medications.map((med, index) => {
+              const colors = ['#ec4899', '#ffd700', '#10b981', '#3b82f6', '#8b5cf6', '#f59e0b'];
+              return (
+                <Line
+                  key={med.id}
+                  type="monotone"
+                  dataKey={med.name}
+                  stroke={colors[index % colors.length]}
+                  strokeWidth={2}
+                  connectNulls={false}
+                  dot={{ fill: colors[index % colors.length], strokeWidth: 2, r: 4 }}
+                />
+              );
+            })}
           </LineChart>
         </ChartContainer>
-      </Card>
-
-      {/* Medication Breakdown */}
-      <Card className="medication-card bg-gray-800 p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Pill className="text-hot-pink" size={20} />
-          <h3 className="text-lg font-semibold text-foreground">Medication Adherence by Type</h3>
-        </div>
-        <ChartContainer config={chartConfig} className="h-80">
-          <BarChart data={medicationBreakdown}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-            <XAxis dataKey="name" stroke="#9ca3af" />
-            <YAxis stroke="#9ca3af" />
-            <ChartTooltip content={<ChartTooltipContent />} />
-            <Bar dataKey="adherence" fill="#ec4899" radius={[4, 4, 0, 0]} />
-          </BarChart>
-        </ChartContainer>
-      </Card>
-
-      {/* Time Distribution */}
-      <Card className="medication-card bg-gray-800 p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Clock className="text-hot-pink" size={20} />
-          <h3 className="text-lg font-semibold text-foreground">Medication Timing Distribution</h3>
-        </div>
-        <div className="flex flex-col lg:flex-row items-center gap-8">
-          <div className="flex-1">
-            <ChartContainer config={chartConfig} className="h-80">
-              <PieChart>
-                <Pie
-                  data={timeDistribution}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={120}
-                  paddingAngle={5}
-                  dataKey="count"
-                >
-                  {timeDistribution.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <ChartTooltip content={<ChartTooltipContent />} />
-              </PieChart>
-            </ChartContainer>
-          </div>
-          <div className="flex flex-col gap-2">
-            {timeDistribution.map((entry, index) => (
-              <div key={entry.time} className="flex items-center gap-3">
-                <div 
-                  className="w-4 h-4 rounded-full" 
-                  style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                />
-                <span className="text-sm text-foreground">{entry.time}</span>
-                <span className="text-sm text-muted-foreground">({entry.count})</span>
-              </div>
-            ))}
-          </div>
+        <div className="mt-4 text-xs text-muted-foreground">
+          <p>Track your medication dosage changes over time. Add dosage entries in the Medication Tracker.</p>
         </div>
       </Card>
     </div>

@@ -107,7 +107,7 @@ const WellnessApp = () => {
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-11 mb-8">
+          <TabsList className="grid w-full grid-cols-10 mb-8">
             <TabsTrigger value="medications" className="flex items-center gap-2">
               <Bell size={18} />
               <span className="hidden sm:inline">Meds</span>
@@ -140,10 +140,6 @@ const WellnessApp = () => {
               <CheckSquare size={18} />
               <span className="hidden sm:inline">To-Do</span>
             </TabsTrigger>
-            <TabsTrigger value="selfcare" className="flex items-center gap-2">
-              <Heart size={18} />
-              <span className="hidden sm:inline">Care</span>
-            </TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <TrendingUp size={18} />
               <span className="hidden sm:inline">Analytics</span>
@@ -159,7 +155,7 @@ const WellnessApp = () => {
           </TabsContent>
 
           <TabsContent value="health" className="animate-slide-in">
-            <HealthMetrics onBack={() => setActiveTab('medications')} />
+            <HealthMetrics />
           </TabsContent>
 
           <TabsContent value="timer" className="animate-slide-in">
@@ -171,7 +167,7 @@ const WellnessApp = () => {
           </TabsContent>
 
           <TabsContent value="exercise" className="animate-slide-in">
-            <ExerciseTracker onBack={() => setActiveTab('medications')} />
+            <ExerciseTracker />
           </TabsContent>
 
           <TabsContent value="diet" className="animate-slide-in">
@@ -179,15 +175,11 @@ const WellnessApp = () => {
           </TabsContent>
 
           <TabsContent value="work" className="animate-slide-in">
-            <WorkProductivityTracker onBack={() => setActiveTab('medications')} />
+            <WorkProductivityTracker />
           </TabsContent>
 
           <TabsContent value="todos" className="animate-slide-in">
             <PersonalTodos />
-          </TabsContent>
-
-          <TabsContent value="selfcare" className="animate-slide-in">
-            <SelfCareReminders />
           </TabsContent>
 
           <TabsContent value="analytics" className="animate-slide-in">
