@@ -2,7 +2,7 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.valykhan.wellnesshub.app',
+  appId: 'com.wellnesshub.app',
   appName: 'WellnessHub',
   webDir: 'dist',
   server: {
