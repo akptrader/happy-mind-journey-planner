@@ -7,6 +7,8 @@ import { useToast } from '@/hooks/use-toast';
 import AddMedicationDialog from './AddMedicationDialog';
 import MedicationHistory from './MedicationHistory';
 import MedicationDosageTracker from './MedicationDosageTracker';
+import DosageTracker from './DosageTracker';
+import SideEffectsTracker from './SideEffectsTracker';
 
 interface Medication {
   id: string;
