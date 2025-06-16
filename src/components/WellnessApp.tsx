@@ -12,7 +12,8 @@ import PersonalTodos from './PersonalTodos';
 import DietTracker from './DietTracker';
 import HealthMetrics from './HealthMetrics';
 import Analytics from './Analytics';
-import { Bell, List, Heart, Calendar, Timer, Edit, Smartphone, Dumbbell, CheckSquare, Apple, TrendingUp, Activity } from 'lucide-react';
+import WorkProductivityTracker from './WorkProductivityTracker';
+import { Bell, List, Heart, Calendar, Timer, Edit, Smartphone, Dumbbell, CheckSquare, Apple, TrendingUp, Activity, Briefcase } from 'lucide-react';
 import { NotificationService } from '@/services/NotificationService';
 import { useToast } from '@/hooks/use-toast';
 
@@ -106,7 +107,7 @@ const WellnessApp = () => {
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-10 mb-8">
+          <TabsList className="grid w-full grid-cols-11 mb-8">
             <TabsTrigger value="medications" className="flex items-center gap-2">
               <Bell size={18} />
               <span className="hidden sm:inline">Meds</span>
@@ -130,6 +131,10 @@ const WellnessApp = () => {
             <TabsTrigger value="diet" className="flex items-center gap-2">
               <Apple size={18} />
               <span className="hidden sm:inline">Diet</span>
+            </TabsTrigger>
+            <TabsTrigger value="work" className="flex items-center gap-2">
+              <Briefcase size={18} />
+              <span className="hidden sm:inline">Work</span>
             </TabsTrigger>
             <TabsTrigger value="todos" className="flex items-center gap-2">
               <CheckSquare size={18} />
@@ -171,6 +176,10 @@ const WellnessApp = () => {
 
           <TabsContent value="diet" className="animate-slide-in">
             <DietTracker />
+          </TabsContent>
+
+          <TabsContent value="work" className="animate-slide-in">
+            <WorkProductivityTracker onBack={() => setActiveTab('medications')} />
           </TabsContent>
 
           <TabsContent value="todos" className="animate-slide-in">
