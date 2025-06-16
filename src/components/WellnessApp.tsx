@@ -20,7 +20,7 @@ import TabNavigation from './TabNavigation';
 import AppFooter from './AppFooter';
 
 const WellnessApp = () => {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState('timer');
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
 
