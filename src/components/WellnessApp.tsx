@@ -11,13 +11,18 @@ import DietTracker from './DietTracker';
 import HealthMetrics from './HealthMetrics';
 import Analytics from './Analytics';
 import WorkProductivityTracker from './WorkProductivityTracker';
+import Dashboard from './Dashboard';
+import SearchAndFilter from './SearchAndFilter';
+import CustomReminders from './CustomReminders';
+import SymptomCorrelation from './SymptomCorrelation';
 import Header from './Header';
 import TabNavigation from './TabNavigation';
 import AppFooter from './AppFooter';
 
 const WellnessApp = () => {
-  const [activeTab, setActiveTab] = useState('medications');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
 
   useEffect(() => {
     // Check if notifications are already enabled
@@ -37,6 +42,22 @@ const WellnessApp = () => {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabNavigation />
+
+          <TabsContent value="dashboard" className="animate-slide-in">
+            <Dashboard />
+          </TabsContent>
+
+          <TabsContent value="search" className="animate-slide-in">
+            <SearchAndFilter onResultsChange={setSearchResults} />
+          </TabsContent>
+
+          <TabsContent value="reminders" className="animate-slide-in">
+            <CustomReminders />
+          </TabsContent>
+
+          <TabsContent value="correlations" className="animate-slide-in">
+            <SymptomCorrelation />
+          </TabsContent>
 
           <TabsContent value="medications" className="animate-slide-in">
             <MedicationTracker />

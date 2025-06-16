@@ -52,6 +52,15 @@
 
   body {
     @apply bg-background text-foreground font-sans;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Mobile optimization */
+  @media (max-width: 768px) {
+    body {
+      font-size: 14px;
+    }
   }
 }
 
@@ -66,6 +75,13 @@
 
   .medication-card {
     @apply bg-card border border-border rounded-xl p-6 shadow-sm transition-all duration-300 hover:shadow-md;
+  }
+
+  /* Mobile-optimized medication cards */
+  @media (max-width: 768px) {
+    .medication-card {
+      @apply p-4 rounded-lg;
+    }
   }
 
   .completed-task {
@@ -90,5 +106,135 @@
 
   .btn-hot-pink:hover {
     background: rgb(240 240 240);
+  }
+
+  /* Mobile-first animations */
+  .animate-slide-in {
+    animation: slideIn 0.3s ease-out;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.4s ease-out;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.2s ease-out;
+  }
+
+  /* Mobile-optimized touch targets */
+  @media (max-width: 768px) {
+    button {
+      min-height: 44px;
+      min-width: 44px;
+    }
+    
+    input, textarea, select {
+      min-height: 44px;
+    }
+
+    .grid-cols-10 {
+      @apply grid-cols-2;
+    }
+
+    .grid-cols-6 {
+      @apply grid-cols-3;
+    }
+
+    .grid-cols-4 {
+      @apply grid-cols-2;
+    }
+
+    /* Optimize tab navigation for mobile */
+    [data-orientation="horizontal"] {
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    [data-orientation="horizontal"]::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  /* Smooth scrolling for mobile */
+  @media (max-width: 768px) {
+    * {
+      scroll-behavior: smooth;
+    }
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Mobile-specific improvements */
+@media (max-width: 768px) {
+  .container {
+    @apply px-2;
+  }
+
+  /* Improve readability on small screens */
+  h1 {
+    @apply text-2xl;
+  }
+
+  h2 {
+    @apply text-xl;
+  }
+
+  h3 {
+    @apply text-lg;
+  }
+
+  /* Make charts more mobile-friendly */
+  .recharts-responsive-container {
+    min-height: 200px !important;
+  }
+
+  /* Optimize card spacing for mobile */
+  .space-y-6 > * + * {
+    @apply mt-4;
+  }
+
+  .space-y-4 > * + * {
+    @apply mt-3;
+  }
+
+  /* Improve form layouts on mobile */
+  .grid-cols-2 {
+    @apply grid-cols-1 gap-3;
+  }
+
+  /* Better button layouts for mobile */
+  .flex.gap-2 {
+    @apply flex-wrap gap-2;
   }
 }
