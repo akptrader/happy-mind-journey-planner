@@ -19,74 +19,6 @@
     --primary: 236 72 153;
     --primary-foreground: 255 255 255;
 
-    --secondary: 245 245 220;
-    --secondary-foreground: 0 0 0;
-
-    --muted: 40 40 40;
-    --muted-foreground: 200 200 200;
-
-    --accent: 236 72 153;
-    --accent-foreground: 255 255 255;
-
-    --destructive: 220 38 38;
-    --destructive-foreground: 255 255 255;
-
-    --border: 40 40 40;
-    --input: 40 40 40;
-    --ring: 236 72 153;
-
-    --hot-pink: 236 72 153;
-    --champagne: 247 231 206;
-    --light-champagne: 250 240 220;
-    --dark-champagne: 218 190 130;
-    --gold: 255 215 0;
-
-    --radius: 0.75rem;
-  }
-
-  .light {
-    --background: 255 255 255;
-    --foreground: 0 0 0;
-
-    --card: 255 255 255;
-    --card-foreground: 0 0 0;
-
-    --popover: 255 255 255;
-    --popover-foreground: 0 0 0;
-
-    --primary: 236 72 153;
-    --primary-foreground: 255 255 255;
-
-    --secondary: 252 231 243;
-    --secondary-foreground: 236 72 153;
-
-    --muted: 252 231 243;
-    --muted-foreground: 236 72 153;
-
-    --accent: 236 72 153;
-    --accent-foreground: 255 255 255;
-
-    --destructive: 220 38 38;
-    --destructive-foreground: 255 255 255;
-
-    --border: 236 72 153;
-    --input: 252 231 243;
-    --ring: 236 72 153;
-  }
-
-  .dark {
-    --background: 0 0 0;
-    --foreground: 255 255 255;
-
-    --card: 20 20 20;
-    --card-foreground: 255 255 255;
-
-    --popover: 20 20 20;
-    --popover-foreground: 255 255 255;
-
-    --primary: 236 72 153;
-    --primary-foreground: 255 255 255;
-
     --secondary: 40 40 40;
     --secondary-foreground: 255 255 255;
 
@@ -102,6 +34,14 @@
     --border: 40 40 40;
     --input: 40 40 40;
     --ring: 236 72 153;
+
+    --hot-pink: 236 72 153;
+    --champagne: 247 231 206;
+    --light-champagne: 250 240 220;
+    --dark-champagne: 218 190 130;
+    --gold: 255 215 0;
+
+    --radius: 0.75rem;
   }
 }
 
@@ -120,24 +60,12 @@
     background: linear-gradient(135deg, rgb(236 72 153) 0%, rgb(255 215 0) 100%);
   }
   
-  .light .wellness-gradient {
-    background: linear-gradient(135deg, rgb(236 72 153) 0%, rgb(251 207 232) 100%);
-  }
-  
   .calm-gradient {
     background: linear-gradient(135deg, rgb(40 40 40) 0%, rgb(60 60 60) 100%);
   }
 
-  .light .calm-gradient {
-    background: linear-gradient(135deg, rgb(252 231 243) 0%, rgb(244 201 224) 100%);
-  }
-
   .medication-card {
     @apply bg-card border border-border rounded-xl p-6 shadow-sm transition-all duration-300 hover:shadow-md;
-  }
-
-  .light .medication-card {
-    @apply border-hot-pink/30 shadow-hot-pink/10;
   }
 
   .completed-task {
@@ -162,15 +90,5 @@
 
   .btn-hot-pink:hover {
     background: rgb(240 240 240);
-  }
-
-  .light .btn-hot-pink {
-    background: rgb(236 72 153);
-    color: rgb(255 255 255);
-    border: 1px solid rgb(236 72 153);
-  }
-
-  .light .btn-hot-pink:hover {
-    background: rgb(219 39 119);
   }
 }

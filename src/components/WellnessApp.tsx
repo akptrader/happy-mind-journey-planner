@@ -16,7 +16,6 @@ import WorkProductivityTracker from './WorkProductivityTracker';
 import { Bell, List, Heart, Calendar, Timer, Edit, Smartphone, Dumbbell, CheckSquare, Apple, TrendingUp, Activity, Briefcase } from 'lucide-react';
 import { NotificationService } from '@/services/NotificationService';
 import { useToast } from '@/hooks/use-toast';
-import ThemeToggle from './ThemeToggle';
 
 const WellnessApp = () => {
   const [activeTab, setActiveTab] = useState('medications');
@@ -70,13 +69,8 @@ const WellnessApp = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="wellness-gradient rounded-2xl p-6 text-white mb-6">
-            <div className="flex justify-between items-start mb-4">
-              <div className="flex-1">
-                <h1 className="text-3xl font-bold mb-2">Wellness Companion</h1>
-                <p className="text-lg opacity-90">Managing your health journey with care</p>
-              </div>
-              <ThemeToggle />
-            </div>
+            <h1 className="text-3xl font-bold mb-2">Wellness Companion</h1>
+            <p className="text-lg opacity-90">Managing your health journey with care</p>
             <div className="flex items-center justify-center gap-2 mt-4 text-sm opacity-80">
               <Calendar size={16} />
               <span>{currentDate}</span>
