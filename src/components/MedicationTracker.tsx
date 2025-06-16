@@ -1,278 +1,139 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Clock, Bell, Check, History, StickyNote, Plus } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Bell,
+  List,
+  Heart,
+  Calendar,
+  Timer,
+  Edit,
+  Plus,
+  History,
+  Activity,
+  Pill,
+  TrendingUp
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import MedicationHistory from './MedicationHistory';
-import AddNoteDialog from './AddNoteDialog';
 import AddMedicationDialog from './AddMedicationDialog';
-import SupplementTracker from './SupplementTracker';
+import MedicationHistory from './MedicationHistory';
 import MoodTracker from './MoodTracker';
 import HealthMetrics from './HealthMetrics';
+import Supplements from './Supplements';
+import AddSupplementDialog from './AddSupplementDialog';
+import Analytics from './Analytics';
 
-interface MedicationDose {
+interface Medication {
   id: string;
   name: string;
-  time: string;
-  taken: boolean;
-  takenAt?: string;
-  instructions: string;
-  type: 'cobenfy' | 'latuda' | 'seroquel' | 'caplyta' | 'lantus' | 'custom';
-  note?: string;
-  dosage?: string;
+  dosage: string;
+  frequency: string;
+  notes?: string;
 }
 
-interface MedicationRecord {
+interface MedicationLog {
   id: string;
   medicationId: string;
-  name: string;
-  takenAt: string;
-  note?: string;
-  type: 'cobenfy' | 'latuda' | 'seroquel' | 'caplyta' | 'lantus' | 'custom';
-  dosage?: string;
+  timestamp: string;
 }
 
 const MedicationTracker = () => {
-  const { toast } = useToast();
-  const [showHistory, setShowHistory] = useState(false);
-  const [showSupplements, setShowSupplements] = useState(false);
-  const [showMoodTracker, setShowMoodTracker] = useState(false);
-  const [showHealthMetrics, setShowHealthMetrics] = useState(false);
-  const [noteDialogOpen, setNoteDialogOpen] = useState(false);
-  const [addMedDialogOpen, setAddMedDialogOpen] = useState(false);
-  const [selectedMedication, setSelectedMedication] = useState<string | null>(null);
-  
-  const [medications, setMedications] = useState<MedicationDose[]>(() => {
+  const [medications, setMedications] = useState<Medication[]>(() => {
     const saved = localStorage.getItem('medications');
-    return saved ? JSON.parse(saved) : [
-      {
-        id: '1',
-        name: 'Anti-nausea medication',
-        time: '08:00',
-        taken: false,
-        instructions: 'Take before first Cobenfy dose',
-        type: 'custom',
-        dosage: 'As needed'
-      },
-      {
-        id: '2',
-        name: 'Cobenfy',
-        time: '08:30',
-        taken: false,
-        instructions: '2 hours after breakfast OR 1 hour before lunch',
-        type: 'cobenfy',
-        dosage: 'Morning dose'
-      },
-      {
-        id: '3',
-        name: 'Anti-nausea medication',
-        time: '15:00',
-        taken: false,
-        instructions: 'Take before second Cobenfy dose',
-        type: 'custom',
-        dosage: 'As needed'
-      },
-      {
-        id: '4',
-        name: 'Cobenfy',
-        time: '15:30',
-        taken: false,
-        instructions: '2 hours after lunch, 1+ hour before Latuda',
-        type: 'cobenfy',
-        dosage: 'Afternoon dose'
-      },
-      {
-        id: '5',
-        name: 'Latuda',
-        time: '18:00',
-        taken: false,
-        instructions: 'With 350+ calories, 2+ hours before bed',
-        type: 'latuda',
-        dosage: '40mg'
-      },
-      {
-        id: '6',
-        name: 'Seroquel',
-        time: '21:00',
-        taken: false,
-        instructions: 'Before bedtime',
-        type: 'seroquel',
-        dosage: '25mg'
-      },
-      {
-        id: '7',
-        name: 'Caplyta',
-        time: '19:00',
-        taken: false,
-        instructions: 'With or without food',
-        type: 'caplyta',
-        dosage: '42mg'
-      },
-      {
-        id: '8',
-        name: 'Lantus',
-        time: '22:00',
-        taken: false,
-        instructions: 'Same time each day',
-        type: 'lantus',
-        dosage: '10 units'
-      }
-    ];
-  });
-
-  const [medicationHistory, setMedicationHistory] = useState<MedicationRecord[]>(() => {
-    const saved = localStorage.getItem('medicationHistory');
     return saved ? JSON.parse(saved) : [];
   });
+  const [medicationLog, setMedicationLog] = useState<MedicationLog[]>(() => {
+    const saved = localStorage.getItem('medicationLog');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [showMoodTracker, setShowMoodTracker] = useState(false);
+  const [showHealthMetrics, setShowHealthMetrics] = useState(false);
+  const [showSupplements, setShowSupplements] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     localStorage.setItem('medications', JSON.stringify(medications));
   }, [medications]);
 
   useEffect(() => {
-    localStorage.setItem('medicationHistory', JSON.stringify(medicationHistory));
-  }, [medicationHistory]);
+    localStorage.setItem('medicationLog', JSON.stringify(medicationLog));
+  }, [medicationLog]);
 
-  const markAsTaken = (id: string, note?: string) => {
-    const now = new Date().toISOString();
-    const medication = medications.find(med => med.id === id);
-    
-    if (!medication) return;
-
-    setMedications(prev => 
-      prev.map(med => 
-        med.id === id 
-          ? { ...med, taken: true, takenAt: now, note }
-          : med
-      )
-    );
-
-    const historyRecord: MedicationRecord = {
-      id: `${id}-${now}`,
-      medicationId: id,
-      name: medication.name,
-      takenAt: now,
-      note,
-      type: medication.type,
-      dosage: medication.dosage
-    };
-
-    setMedicationHistory(prev => [historyRecord, ...prev]);
-    
+  const addMedication = (medication: Medication) => {
+    setMedications(prev => [...prev, medication]);
+    setShowAddDialog(false);
     toast({
-      title: "Medication taken! 💊",
-      description: `${medication.name} ${medication.dosage ? `(${medication.dosage})` : ''} marked as complete`,
+      title: "Medication added! 💊",
+      description: `${medication.name} added to your list.`,
     });
   };
 
-  const handleTakeWithNote = (id: string) => {
-    setSelectedMedication(id);
-    setNoteDialogOpen(true);
-  };
-
-  const handleNoteSubmit = (note: string) => {
-    if (selectedMedication) {
-      markAsTaken(selectedMedication, note);
-    }
-    setNoteDialogOpen(false);
-    setSelectedMedication(null);
-  };
-
-  const handleAddMedication = (newMed: Omit<MedicationDose, 'id' | 'taken'>) => {
-    const medication: MedicationDose = {
-      ...newMed,
+  const logMedication = (medicationId: string) => {
+    const newLogEntry: MedicationLog = {
       id: Date.now().toString(),
-      taken: false
+      medicationId: medicationId,
+      timestamp: new Date().toISOString(),
     };
-    setMedications(prev => [...prev, medication]);
-    setAddMedDialogOpen(false);
+    setMedicationLog(prev => [...prev, newLogEntry]);
+    toast({
+      title: "Medication logged! ✅",
+      description: "Good job, keep it up!",
+    });
   };
 
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'cobenfy':
-        return 'border-l-hot-pink bg-gray-800';
-      case 'latuda':
-        return 'border-l-gold bg-gray-800';
-      case 'seroquel':
-        return 'border-l-purple-500 bg-gray-800';
-      case 'caplyta':
-        return 'border-l-blue-500 bg-gray-800';
-      case 'lantus':
-        return 'border-l-green-500 bg-gray-800';
-      case 'custom':
-        return 'border-l-champagne-dark bg-gray-800';
-      default:
-        return 'border-l-gray-300 bg-gray-800';
-    }
+  const deleteMedication = (id: string) => {
+    setMedications(prev => prev.filter(medication => medication.id !== id));
+    setMedicationLog(prev => prev.filter(log => log.medicationId !== id));
+    toast({
+      title: "Medication deleted! 🗑️",
+      description: "Medication removed from your list.",
+    });
   };
 
-  if (showHistory) {
-    return (
-      <MedicationHistory 
-        history={medicationHistory}
-        onBack={() => setShowHistory(false)}
-      />
-    );
+  if (showAnalytics) {
+    return <Analytics onBack={() => setShowAnalytics(false)} />;
   }
 
-  if (showSupplements) {
-    return (
-      <SupplementTracker onBack={() => setShowSupplements(false)} />
-    );
+  if (showHistory) {
+    return <MedicationHistory
+      medications={medications}
+      medicationLog={medicationLog}
+      onBack={() => setShowHistory(false)}
+    />;
   }
 
   if (showMoodTracker) {
-    return (
-      <MoodTracker onBack={() => setShowMoodTracker(false)} />
-    );
+    return <MoodTracker onBack={() => setShowMoodTracker(false)} />;
   }
 
   if (showHealthMetrics) {
-    return (
-      <HealthMetrics onBack={() => setShowHealthMetrics(false)} />
-    );
+    return <HealthMetrics onBack={() => setShowHealthMetrics(false)} />;
+  }
+
+  if (showSupplements) {
+    return <Supplements onBack={() => setShowSupplements(false)} />;
   }
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <div className="flex items-center gap-2">
           <Bell className="text-hot-pink" size={24} />
-          <h2 className="text-2xl font-semibold text-foreground">Today's Medications</h2>
+          <h2 className="text-2xl font-semibold text-foreground">Medication Tracker</h2>
         </div>
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex flex-wrap gap-2">
           <Button
-            onClick={() => setShowMoodTracker(true)}
-            variant="outline"
-            className="flex items-center gap-2"
+            onClick={() => setShowAddDialog(true)}
+            className="bg-hot-pink text-black hover:bg-hot-pink/90"
           >
             <Plus size={18} />
-            Mood
-          </Button>
-          <Button
-            onClick={() => setShowHealthMetrics(true)}
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <Plus size={18} />
-            Health
-          </Button>
-          <Button
-            onClick={() => setShowSupplements(true)}
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <Plus size={18} />
-            Supplements
-          </Button>
-          <Button
-            onClick={() => setAddMedDialogOpen(true)}
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <Plus size={18} />
-            Add Med
+            Add Medication
           </Button>
           <Button
             onClick={() => setShowHistory(true)}
@@ -282,71 +143,95 @@ const MedicationTracker = () => {
             <History size={18} />
             History
           </Button>
+          <Button
+            onClick={() => setShowMoodTracker(true)}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <Heart size={18} />
+            Mood
+          </Button>
+          <Button
+            onClick={() => setShowHealthMetrics(true)}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <Activity size={18} />
+            Health
+          </Button>
+          <Button
+            onClick={() => setShowSupplements(true)}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <Pill size={18} />
+            Supplements
+          </Button>
+          <Button
+            onClick={() => setShowAnalytics(true)}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <TrendingUp size={18} />
+            Analytics
+          </Button>
         </div>
       </div>
-      
-      {medications
-        .sort((a, b) => a.time.localeCompare(b.time))
-        .map((med) => (
-        <Card key={med.id} className={`medication-card border-l-4 ${getTypeColor(med.type)} ${med.taken ? 'completed-task' : ''}`}>
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <Clock size={18} className="text-muted-foreground" />
-                <span className="font-medium text-lg">{med.time}</span>
-                <span className="font-semibold text-foreground">{med.name}</span>
-                {med.dosage && (
-                  <span className="text-sm text-gold bg-gray-700 px-2 py-1 rounded">
-                    {med.dosage}
-                  </span>
-                )}
-                {med.taken && med.takenAt && (
-                  <span className="text-sm text-gold">
-                    ✓ {new Date(med.takenAt).toLocaleTimeString()}
-                  </span>
-                )}
-              </div>
-              <p className="text-sm text-muted-foreground ml-9">{med.instructions}</p>
-              {med.note && (
-                <p className="text-sm text-champagne ml-9 mt-1">📝 {med.note}</p>
-              )}
-            </div>
-            
-            <div className="flex gap-2 ml-4">
-              {!med.taken && (
-                <Button
-                  onClick={() => handleTakeWithNote(med.id)}
-                  variant="outline"
-                  size="sm"
-                  className="border-hot-pink text-hot-pink hover:bg-hot-pink hover:text-black"
-                >
-                  <StickyNote size={16} />
-                </Button>
-              )}
-              <Button
-                onClick={() => markAsTaken(med.id)}
-                disabled={med.taken}
-                className={`${med.taken ? 'bg-gray-600 text-gray-300 cursor-not-allowed' : 'bg-white text-hot-pink hover:bg-gray-100 border border-hot-pink'}`}
-              >
-                {med.taken ? <Check size={18} /> : 'Take'}
-              </Button>
-            </div>
-          </div>
+
+      {medications.length === 0 ? (
+        <Card className="medication-card bg-gray-800 p-6 text-center">
+          <Bell className="text-hot-pink mx-auto mb-4" size={48} />
+          <h3 className="text-lg font-semibold text-foreground mb-2">No Medications Added</h3>
+          <p className="text-muted-foreground">Add your medications to start tracking.</p>
         </Card>
-      ))}
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {medications.map((medication) => (
+            <Card key={medication.id} className="medication-card bg-gray-800 p-4">
+              <div className="flex items-start justify-between">
+                <div className="space-y-2">
+                  <h3 className="text-xl font-semibold text-gold">{medication.name}</h3>
+                  <p className="text-sm text-champagne">
+                    {medication.dosage}, {medication.frequency}
+                  </p>
+                  {medication.notes && (
+                    <p className="text-xs text-muted-foreground">{medication.notes}</p>
+                  )}
+                </div>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => deleteMedication(medication.id)}
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="flex justify-between items-center mt-4">
+                <Button
+                  className="bg-hot-pink text-black hover:bg-hot-pink/90"
+                  onClick={() => logMedication(medication.id)}
+                >
+                  Take Now
+                </Button>
+                <span className="text-xs text-muted-foreground">
+                  Last taken:{' '}
+                  {medicationLog
+                    .filter((log) => log.medicationId === medication.id)
+                    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+                    .slice(0, 1)
+                    .map((log) => (
+                      <span key={log.id}>
+                        {new Date(log.timestamp).toLocaleDateString()}
+                      </span>
+                    ))}
+                </span>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
 
-      <AddNoteDialog
-        open={noteDialogOpen}
-        onOpenChange={setNoteDialogOpen}
-        onSubmit={handleNoteSubmit}
-        medicationName={selectedMedication ? medications.find(m => m.id === selectedMedication)?.name || '' : ''}
-      />
-
-      <AddMedicationDialog
-        open={addMedDialogOpen}
-        onOpenChange={setAddMedDialogOpen}
-        onSubmit={handleAddMedication}
-      />
+      <AddMedicationDialog open={showAddDialog} onOpenChange={setShowAddDialog} onSubmit={addMedication} />
     </div>
   );
 };
