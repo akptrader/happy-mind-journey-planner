@@ -10,7 +10,8 @@ interface MedicationRecord {
   name: string;
   takenAt: string;
   note?: string;
-  type: 'cobenfy' | 'latuda' | 'anti-nausea';
+  type: 'cobenfy' | 'latuda' | 'seroquel' | 'caplyta' | 'lantus' | 'custom';
+  dosage?: string;
 }
 
 interface MedicationHistoryProps {
@@ -27,7 +28,13 @@ const MedicationHistory = ({ history, onBack }: MedicationHistoryProps) => {
         return 'border-l-hot-pink bg-gray-800';
       case 'latuda':
         return 'border-l-gold bg-gray-800';
-      case 'anti-nausea':
+      case 'seroquel':
+        return 'border-l-purple-500 bg-gray-800';
+      case 'caplyta':
+        return 'border-l-blue-500 bg-gray-800';
+      case 'lantus':
+        return 'border-l-green-500 bg-gray-800';
+      case 'custom':
         return 'border-l-champagne-dark bg-gray-800';
       default:
         return 'border-l-gray-300 bg-gray-800';
@@ -119,6 +126,11 @@ const MedicationHistory = ({ history, onBack }: MedicationHistoryProps) => {
                           {new Date(record.takenAt).toLocaleTimeString()}
                         </span>
                         <span className="font-semibold text-foreground">{record.name}</span>
+                        {record.dosage && (
+                          <span className="text-sm text-gold bg-gray-700 px-2 py-1 rounded">
+                            {record.dosage}
+                          </span>
+                        )}
                       </div>
                       {record.note && (
                         <div className="flex items-start gap-2 ml-7">
