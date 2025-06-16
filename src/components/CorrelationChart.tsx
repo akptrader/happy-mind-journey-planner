@@ -36,13 +36,21 @@ const CorrelationChart = ({ data }: CorrelationChartProps) => {
       label: "Focus",
       color: "#f5deb3",
     },
+    seroquelDosage: {
+      label: "Seroquel Dosage",
+      color: "#8b5cf6",
+    },
+    sideEffectsSeverity: {
+      label: "Side Effects",
+      color: "#f97316",
+    },
   };
 
   return (
     <Card className="medication-card bg-gray-800 p-6">
       <div className="flex items-center gap-2 mb-4">
         <TrendingUp className="text-hot-pink" size={20} />
-        <h3 className="text-lg font-semibold text-foreground">Complete Health & Work Correlation</h3>
+        <h3 className="text-lg font-semibold text-foreground">Health, Medication & Work Correlation</h3>
       </div>
       <ChartContainer config={chartConfig} className="h-80">
         <LineChart data={data}>
@@ -92,10 +100,27 @@ const CorrelationChart = ({ data }: CorrelationChartProps) => {
             name="Exercise (min ÷ 10)"
             strokeDasharray="5 5"
           />
+          <Line 
+            type="monotone" 
+            dataKey="seroquelDosage" 
+            stroke="#8b5cf6" 
+            strokeWidth={2}
+            connectNulls={false}
+            name="Seroquel Dosage (mg ÷ 10)"
+            strokeDasharray="3 3"
+          />
+          <Line 
+            type="monotone" 
+            dataKey="sideEffectsSeverity" 
+            stroke="#f97316" 
+            strokeWidth={2}
+            connectNulls={false}
+            name="Side Effects (0-10)"
+          />
         </LineChart>
       </ChartContainer>
       <div className="mt-4 text-xs text-muted-foreground">
-        <p>Note: Exercise minutes are divided by 10 for better visualization. Days with Seroquel are marked with higher medication adherence.</p>
+        <p>Note: Exercise minutes and Seroquel dosage are divided by 10 for better visualization. Side effects rated 0-10 severity.</p>
       </div>
     </Card>
   );

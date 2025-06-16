@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bell, Plus, History, Clock, Check, X, Pill, TrendingUp } from 'lucide-react';
+import { Bell, Plus, History, Clock, Check, X, Pill, TrendingUp, Activity } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import AddMedicationDialog from './AddMedicationDialog';
 import MedicationHistory from './MedicationHistory';
@@ -120,14 +120,18 @@ const MedicationTracker = () => {
   return (
     <div className="space-y-4">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-6">
+        <TabsList className="grid w-full grid-cols-4 mb-6">
           <TabsTrigger value="current" className="flex items-center gap-2">
             <Pill size={18} />
             Current Meds
           </TabsTrigger>
           <TabsTrigger value="dosage" className="flex items-center gap-2">
             <TrendingUp size={18} />
-            Dosage & Side Effects
+            Dosage & Effects
+          </TabsTrigger>
+          <TabsTrigger value="side-effects" className="flex items-center gap-2">
+            <Activity size={18} />
+            Side Effects
           </TabsTrigger>
           <TabsTrigger value="history" className="flex items-center gap-2">
             <History size={18} />
@@ -210,7 +214,14 @@ const MedicationTracker = () => {
         </TabsContent>
 
         <TabsContent value="dosage" className="animate-fade-in">
-          <MedicationDosageTracker />
+          <div className="space-y-6">
+            <DosageTracker />
+            <MedicationDosageTracker />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="side-effects" className="animate-fade-in">
+          <SideEffectsTracker />
         </TabsContent>
 
         <TabsContent value="history" className="animate-fade-in">

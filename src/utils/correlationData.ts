@@ -8,6 +8,8 @@ export const loadDailyCorrelationData = (timeRange: string): DailyCorrelationDat
   const healthMetrics = JSON.parse(localStorage.getItem('healthMetrics') || '[]');
   const exercises = JSON.parse(localStorage.getItem('exercises') || '[]');
   const workEntries = JSON.parse(localStorage.getItem('workEntries') || '[]');
+  const sideEffects = JSON.parse(localStorage.getItem('sideEffects') || '[]');
+  const dosageEntries = JSON.parse(localStorage.getItem('dosageEntries') || '[]');
 
   const daysToCheck = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 90;
   const dailyData: DailyCorrelationData[] = [];
@@ -33,6 +35,12 @@ export const loadDailyCorrelationData = (timeRange: string): DailyCorrelationDat
     const dayWork = workEntries.filter((work: any) => 
       new Date(work.timestamp).toDateString() === dateStr
     );
+    const daySideEffects = sideEffects.filter((effect: any) => 
+      new Date(effect.timestamp).toDateString() === dateStr
+    );
+    const dayDosages = dosageEntries.filter((dosage: any) => 
+      new Date(dosage.timestamp).toDateString() === dateStr
+    );
 
     // Calculate averages and totals
     const avgMood = dayMoods.length > 0 
@@ -41,8 +49,8 @@ export const loadDailyCorrelationData = (timeRange: string): DailyCorrelationDat
     
     const bloodSugar = dayHealthMetrics.find((m: any) => m.type === 'blood-sugar')?.value || null;
     const sleepHours = dayHealthMetrics.find((m: any) => m.type === 'sleep')?.value || null;
+    const weight = dayHealthMetrics.find((m: any) => m.type === 'weight')?.value || null;
     const exerciseMinutes = dayExercises.reduce((sum: number, ex: any) => sum + ex.duration, 0);
-    const medicationAdherence = medications.length > 0 ? (dayMedLogs.length / medications.length) * 100 : 0;
     
     // Work productivity metrics
     const avgProductivity = dayWork.length > 0 
@@ -55,11 +63,23 @@ export const loadDailyCorrelationData = (timeRange: string): DailyCorrelationDat
       ? dayWork.reduce((sum: number, work: any) => sum + work.energyLevel, 0) / dayWork.length
       : null;
 
-    // Check for Seroquel specifically
-    const seroquelTaken = dayMedLogs.some((log: any) => {
+    // Check for Seroquel specifically and get dosage
+    const seroquelMed = medications.find((m: any) => m.name.toLowerCase().includes('seroquel'));
+    const seroquelLog = dayMedLogs.find((log: any) => {
       const med = medications.find((m: any) => m.id === log.medicationId);
       return med && med.name.toLowerCase().includes('seroquel');
     });
+    const seroquelTaken = !!seroquelLog;
+    const seroquelDosage = seroquelTaken && seroquelMed ? 
+      dayDosages.find((d: any) => d.medicationId === seroquelMed.id)?.dosage || null : null;
+
+    // Calculate total daily dosage across all medications
+    const totalDosage = dayDosages.reduce((sum: number, dosage: any) => sum + dosage.dosage, 0);
+
+    // Calculate average side effects severity
+    const avgSideEffectsSeverity = daySideEffects.length > 0 
+      ? daySideEffects.reduce((sum: number, effect: any) => sum + effect.severity, 0) / daySideEffects.length
+      : null;
 
     dailyData.push({
       date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
@@ -67,11 +87,14 @@ export const loadDailyCorrelationData = (timeRange: string): DailyCorrelationDat
       bloodSugar,
       sleep: sleepHours,
       exercise: exerciseMinutes,
-      medicationAdherence: Math.round(medicationAdherence),
       productivity: avgProductivity ? Math.round(avgProductivity * 10) / 10 : null,
       focus: avgFocus ? Math.round(avgFocus * 10) / 10 : null,
       energy: avgEnergy ? Math.round(avgEnergy * 10) / 10 : null,
-      seroquelTaken
+      seroquelTaken,
+      seroquelDosage,
+      totalDosage,
+      sideEffectsSeverity: avgSideEffectsSeverity ? Math.round(avgSideEffectsSeverity * 10) / 10 : null,
+      weight
     });
   }
 

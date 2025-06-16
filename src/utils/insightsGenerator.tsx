@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Moon, Zap, Briefcase, Droplets } from 'lucide-react';
+import { Moon, Zap, Briefcase, Droplets, Pill, Weight, Activity } from 'lucide-react';
 import { DailyCorrelationData, AnalyticsInsight } from '@/types/analytics';
 
 export const generateInsights = (dailyData: DailyCorrelationData[]): AnalyticsInsight[] => {
@@ -28,20 +28,42 @@ export const generateInsights = (dailyData: DailyCorrelationData[]): AnalyticsIn
     }
   }
 
-  // Seroquel vs Blood Sugar correlation
-  const seroquelDays = dailyData.filter(d => d.seroquelTaken && d.bloodSugar !== null);
-  const nonSeroquelDays = dailyData.filter(d => !d.seroquelTaken && d.bloodSugar !== null);
-  
-  if (seroquelDays.length >= 2 && nonSeroquelDays.length >= 2) {
-    const avgBSWithSeroquel = seroquelDays.reduce((sum, d) => sum + d.bloodSugar!, 0) / seroquelDays.length;
-    const avgBSWithoutSeroquel = nonSeroquelDays.reduce((sum, d) => sum + d.bloodSugar!, 0) / nonSeroquelDays.length;
+  // Seroquel dosage vs Blood Sugar correlation
+  const seroquelDosageDays = dailyData.filter(d => d.seroquelDosage !== null && d.bloodSugar !== null);
+  if (seroquelDosageDays.length >= 3) {
+    const highDoseDays = seroquelDosageDays.filter(d => d.seroquelDosage! > 50);
+    const lowDoseDays = seroquelDosageDays.filter(d => d.seroquelDosage! <= 50);
     
-    if (avgBSWithSeroquel > avgBSWithoutSeroquel + 20) {
+    if (highDoseDays.length > 0 && lowDoseDays.length > 0) {
+      const avgBSHighDose = highDoseDays.reduce((sum, d) => sum + d.bloodSugar!, 0) / highDoseDays.length;
+      const avgBSLowDose = lowDoseDays.reduce((sum, d) => sum + d.bloodSugar!, 0) / lowDoseDays.length;
+      
+      if (avgBSHighDose > avgBSLowDose + 15) {
+        insights.push({
+          type: 'warning',
+          title: 'Higher Seroquel Dosage Correlates with Higher Blood Sugar',
+          description: `Blood sugar averages ${avgBSHighDose.toFixed(0)} mg/dL on high-dose days vs ${avgBSLowDose.toFixed(0)} mg/dL on lower doses.`,
+          icon: <Pill className="text-red-500" size={16} />,
+          priority: 'high'
+        });
+      }
+    }
+  }
+
+  // Total medication dosage vs side effects correlation
+  const dosageSideEffectDays = dailyData.filter(d => d.totalDosage > 0 && d.sideEffectsSeverity !== null);
+  if (dosageSideEffectDays.length >= 3) {
+    const correlation = calculateCorrelation(
+      dosageSideEffectDays.map(d => d.totalDosage),
+      dosageSideEffectDays.map(d => d.sideEffectsSeverity!)
+    );
+    
+    if (correlation > 0.5) {
       insights.push({
         type: 'warning',
-        title: 'Seroquel May Be Affecting Blood Sugar',
-        description: `Blood sugar averages ${avgBSWithSeroquel.toFixed(0)} mg/dL on Seroquel days vs ${avgBSWithoutSeroquel.toFixed(0)} mg/dL on non-Seroquel days.`,
-        icon: <Droplets className="text-red-500" size={16} />,
+        title: 'Higher Total Dosage Increases Side Effects',
+        description: `Strong correlation (${(correlation * 100).toFixed(0)}%) between total daily medication dosage and side effect severity.`,
+        icon: <Activity className="text-orange-500" size={16} />,
         priority: 'high'
       });
     }
@@ -67,6 +89,24 @@ export const generateInsights = (dailyData: DailyCorrelationData[]): AnalyticsIn
           priority: 'high'
         });
       }
+    }
+  }
+
+  // Weight changes correlation with medication
+  const weightData = dailyData.filter(d => d.weight !== null && d.totalDosage > 0);
+  if (weightData.length >= 5) {
+    const sortedByDate = [...weightData].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    const weightChange = sortedByDate[sortedByDate.length - 1].weight! - sortedByDate[0].weight!;
+    const avgDosage = sortedByDate.reduce((sum, d) => sum + d.totalDosage, 0) / sortedByDate.length;
+    
+    if (Math.abs(weightChange) > 2) {
+      insights.push({
+        type: weightChange > 0 ? 'warning' : 'info',
+        title: `Weight ${weightChange > 0 ? 'Gain' : 'Loss'} with Current Medication Regimen`,
+        description: `${Math.abs(weightChange).toFixed(1)} lbs ${weightChange > 0 ? 'gained' : 'lost'} with average daily dosage of ${avgDosage.toFixed(0)}mg.`,
+        icon: <Weight className="text-purple-500" size={16} />,
+        priority: 'medium'
+      });
     }
   }
 
@@ -98,3 +138,20 @@ export const generateInsights = (dailyData: DailyCorrelationData[]): AnalyticsIn
 
   return insights;
 };
+
+// Helper function to calculate correlation coefficient
+function calculateCorrelation(x: number[], y: number[]): number {
+  const n = x.length;
+  if (n === 0) return 0;
+  
+  const sumX = x.reduce((a, b) => a + b, 0);
+  const sumY = y.reduce((a, b) => a + b, 0);
+  const sumXY = x.reduce((sum, xi, i) => sum + xi * y[i], 0);
+  const sumXX = x.reduce((sum, xi) => sum + xi * xi, 0);
+  const sumYY = y.reduce((sum, yi) => sum + yi * yi, 0);
+  
+  const numerator = n * sumXY - sumX * sumY;
+  const denominator = Math.sqrt((n * sumXX - sumX * sumX) * (n * sumYY - sumY * sumY));
+  
+  return denominator === 0 ? 0 : numerator / denominator;
+}
