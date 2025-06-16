@@ -201,7 +201,9 @@ const MedicationTracker = () => {
         </TabsContent>
 
         <TabsContent value="dosage" className="animate-fade-in">
-          <MedicationDosageTracker />
+          <MedicationDosageTracker 
+            medications={medications.map(med => ({ ...med, frequency: med.frequency || 'Daily' }))}
+          />
         </TabsContent>
 
         <TabsContent value="history" className="animate-fade-in">
