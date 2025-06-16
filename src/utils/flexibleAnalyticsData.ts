@@ -5,6 +5,46 @@ interface MetricOption {
   scale?: number;
 }
 
+const parseCustomTimeRange = (timeRange: string) => {
+  if (!timeRange.startsWith('custom:')) return null;
+  
+  const parts = timeRange.split(':');
+  if (parts.length !== 3) return null;
+  
+  return {
+    startDate: new Date(parts[1]),
+    endDate: new Date(parts[2])
+  };
+};
+
+const getDaysToCheck = (timeRange: string) => {
+  if (timeRange.startsWith('custom:')) {
+    const customRange = parseCustomTimeRange(timeRange);
+    if (customRange) {
+      const diffTime = Math.abs(customRange.endDate.getTime() - customRange.startDate.getTime());
+      return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    }
+  }
+  
+  return timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 90;
+};
+
+const getDateRange = (timeRange: string) => {
+  if (timeRange.startsWith('custom:')) {
+    const customRange = parseCustomTimeRange(timeRange);
+    if (customRange) {
+      return { startDate: customRange.startDate, endDate: customRange.endDate };
+    }
+  }
+  
+  const daysToCheck = getDaysToCheck(timeRange);
+  const endDate = new Date();
+  const startDate = new Date();
+  startDate.setDate(endDate.getDate() - daysToCheck);
+  
+  return { startDate, endDate };
+};
+
 export const loadFlexibleAnalyticsData = (timeRange: string, selectedMetrics: string[], metricOptions: MetricOption[]) => {
   // Load all data sources
   const medications = JSON.parse(localStorage.getItem('medications') || '[]');
@@ -17,12 +57,17 @@ export const loadFlexibleAnalyticsData = (timeRange: string, selectedMetrics: st
   const dosageEntries = JSON.parse(localStorage.getItem('dosageEntries') || '[]');
   const foodEntries = JSON.parse(localStorage.getItem('foodEntries') || '[]');
 
-  const daysToCheck = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 90;
+  const { startDate, endDate } = getDateRange(timeRange);
+  const daysToCheck = getDaysToCheck(timeRange);
   const dailyData: any[] = [];
 
   for (let i = daysToCheck - 1; i >= 0; i--) {
-    const date = new Date();
-    date.setDate(date.getDate() - i);
+    const date = new Date(startDate);
+    date.setDate(startDate.getDate() + (daysToCheck - 1 - i));
+    
+    // Skip dates beyond our end date
+    if (date > endDate) continue;
+    
     const dateStr = date.toDateString();
 
     // Get data for this day

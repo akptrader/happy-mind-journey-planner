@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,19 +15,33 @@ const MedicalSummary = ({ timeRange }: MedicalSummaryProps) => {
     generateMedicalSummary();
   }, [timeRange]);
 
-  const generateMedicalSummary = () => {
-    // Load data from localStorage
-    const medications = JSON.parse(localStorage.getItem('medications') || '[]');
-    const medicationLog = JSON.parse(localStorage.getItem('medicationLog') || '[]');
-    const moodEntries = JSON.parse(localStorage.getItem('moodEntries') || '[]');
-    const healthMetrics = JSON.parse(localStorage.getItem('healthMetrics') || '[]');
-    const sideEffects = JSON.parse(localStorage.getItem('sideEffects') || '[]');
-    const exercises = JSON.parse(localStorage.getItem('exercises') || '[]');
-    const workEntries = JSON.parse(localStorage.getItem('workEntries') || '[]');
+  const parseCustomTimeRange = (timeRange: string) => {
+    if (!timeRange.startsWith('custom:')) return null;
+    
+    const parts = timeRange.split(':');
+    if (parts.length !== 3) return null;
+    
+    return {
+      startDate: new Date(parts[1]),
+      endDate: new Date(parts[2])
+    };
+  };
 
+  const getDateRange = (timeRange: string) => {
     const now = new Date();
     let startDate = new Date();
     let periodLabel = '';
+
+    if (timeRange.startsWith('custom:')) {
+      const customRange = parseCustomTimeRange(timeRange);
+      if (customRange) {
+        return {
+          startDate: customRange.startDate,
+          endDate: customRange.endDate,
+          periodLabel: 'Custom Period'
+        };
+      }
+    }
 
     switch (timeRange) {
       case '7d':
@@ -45,25 +58,45 @@ const MedicalSummary = ({ timeRange }: MedicalSummaryProps) => {
         break;
     }
 
-    const periodMoods = moodEntries.filter((entry: any) => 
-      new Date(entry.timestamp) >= startDate
-    );
+    return { startDate, endDate: now, periodLabel };
+  };
 
-    const periodMetrics = healthMetrics.filter((metric: any) => 
-      new Date(metric.timestamp) >= startDate
-    );
+  const generateMedicalSummary = () => {
+    // Load data from localStorage
+    const medications = JSON.parse(localStorage.getItem('medications') || '[]');
+    const medicationLog = JSON.parse(localStorage.getItem('medicationLog') || '[]');
+    const moodEntries = JSON.parse(localStorage.getItem('moodEntries') || '[]');
+    const healthMetrics = JSON.parse(localStorage.getItem('healthMetrics') || '[]');
+    const sideEffects = JSON.parse(localStorage.getItem('sideEffects') || '[]');
+    const exercises = JSON.parse(localStorage.getItem('exercises') || '[]');
+    const workEntries = JSON.parse(localStorage.getItem('workEntries') || '[]');
 
-    const periodSideEffects = sideEffects.filter((effect: any) => 
-      new Date(effect.timestamp) >= startDate
-    );
+    const { startDate, endDate, periodLabel } = getDateRange(timeRange);
 
-    const periodExercises = exercises.filter((exercise: any) => 
-      new Date(exercise.timestamp) >= startDate
-    );
+    const periodMoods = moodEntries.filter((entry: any) => {
+      const entryDate = new Date(entry.timestamp);
+      return entryDate >= startDate && entryDate <= endDate;
+    });
 
-    const periodWork = workEntries.filter((work: any) => 
-      new Date(work.timestamp) >= startDate
-    );
+    const periodMetrics = healthMetrics.filter((metric: any) => {
+      const metricDate = new Date(metric.timestamp);
+      return metricDate >= startDate && metricDate <= endDate;
+    });
+
+    const periodSideEffects = sideEffects.filter((effect: any) => {
+      const effectDate = new Date(effect.timestamp);
+      return effectDate >= startDate && effectDate <= endDate;
+    });
+
+    const periodExercises = exercises.filter((exercise: any) => {
+      const exerciseDate = new Date(exercise.timestamp);
+      return exerciseDate >= startDate && exerciseDate <= endDate;
+    });
+
+    const periodWork = workEntries.filter((work: any) => {
+      const workDate = new Date(work.timestamp);
+      return workDate >= startDate && workDate <= endDate;
+    });
 
     // Calculate mood stability
     const moodValues = periodMoods.map((entry: any) => entry.level);
