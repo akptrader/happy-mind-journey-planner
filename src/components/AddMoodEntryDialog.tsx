@@ -9,7 +9,7 @@ import { Brain } from 'lucide-react';
 
 interface MoodEntryData {
   moodLevel: number;
-  type: 'normal' | 'rapid-cycling' | 'panic-attack' | 'mixed-episode';
+  type: 'normal' | 'rapid-cycling' | 'panic-attack' | 'mixed-episode' | 'depression' | 'hypomania' | 'mania';
   notes?: string;
   triggers?: string[];
   severity?: 'mild' | 'moderate' | 'severe';
@@ -56,7 +56,7 @@ const AddMoodEntryDialog = ({ open, onOpenChange, onSubmit }: AddMoodEntryDialog
     onOpenChange(false);
   };
 
-  const requiresSeverity = formData.type === 'rapid-cycling' || formData.type === 'panic-attack' || formData.type === 'mixed-episode';
+  const requiresSeverity = ['rapid-cycling', 'panic-attack', 'mixed-episode', 'depression', 'hypomania', 'mania'].includes(formData.type);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -97,6 +97,9 @@ const AddMoodEntryDialog = ({ open, onOpenChange, onSubmit }: AddMoodEntryDialog
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <option value="normal">Normal Mood</option>
+              <option value="depression">Depression</option>
+              <option value="hypomania">Hypomania</option>
+              <option value="mania">Mania</option>
               <option value="rapid-cycling">Rapid Cycling</option>
               <option value="panic-attack">Panic Attack</option>
               <option value="mixed-episode">Mixed Episode</option>

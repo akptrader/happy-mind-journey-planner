@@ -25,6 +25,7 @@ import HealthMetrics from './HealthMetrics';
 import Supplements from './Supplements';
 import AddSupplementDialog from './AddSupplementDialog';
 import Analytics from './Analytics';
+import ExerciseTracker from './ExerciseTracker';
 
 interface Medication {
   id: string;
@@ -55,6 +56,7 @@ const MedicationTracker = () => {
   const [showHealthMetrics, setShowHealthMetrics] = useState(false);
   const [showSupplements, setShowSupplements] = useState(false);
   const [showAnalytics, setShowAnalytics] = useState(false);
+  const [showExercise, setShowExercise] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -125,6 +127,10 @@ const MedicationTracker = () => {
 
   if (showSupplements) {
     return <Supplements onBack={() => setShowSupplements(false)} />;
+  }
+
+  if (showExercise) {
+    return <ExerciseTracker onBack={() => setShowExercise(false)} />;
   }
 
   return (

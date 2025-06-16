@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Brain, TrendingUp, AlertTriangle, History } from 'lucide-react';
+import { ArrowLeft, Brain, TrendingUp, AlertTriangle, History, TrendingDown, Zap } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import AddMoodEntryDialog from './AddMoodEntryDialog';
 import MoodHistory from './MoodHistory';
@@ -10,8 +10,8 @@ import MoodHistory from './MoodHistory';
 interface MoodEntry {
   id: string;
   timestamp: string;
-  moodLevel: number; // 1-10 scale
-  type: 'normal' | 'rapid-cycling' | 'panic-attack' | 'mixed-episode';
+  moodLevel: number;
+  type: 'normal' | 'rapid-cycling' | 'panic-attack' | 'mixed-episode' | 'depression' | 'hypomania' | 'mania';
   notes?: string;
   triggers?: string[];
   severity?: 'mild' | 'moderate' | 'severe';
@@ -52,6 +52,12 @@ const MoodTracker = ({ onBack }: MoodTrackerProps) => {
 
   const getTypeIcon = (type: string) => {
     switch (type) {
+      case 'depression':
+        return <TrendingDown className="text-blue-600" size={18} />;
+      case 'hypomania':
+        return <TrendingUp className="text-yellow-500" size={18} />;
+      case 'mania':
+        return <Zap className="text-red-500" size={18} />;
       case 'rapid-cycling':
         return <TrendingUp className="text-orange-500" size={18} />;
       case 'panic-attack':
@@ -65,6 +71,12 @@ const MoodTracker = ({ onBack }: MoodTrackerProps) => {
 
   const getTypeColor = (type: string) => {
     switch (type) {
+      case 'depression':
+        return 'border-l-blue-600';
+      case 'hypomania':
+        return 'border-l-yellow-500';
+      case 'mania':
+        return 'border-l-red-500';
       case 'rapid-cycling':
         return 'border-l-orange-500';
       case 'panic-attack':
