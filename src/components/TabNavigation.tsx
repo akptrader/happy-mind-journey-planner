@@ -14,7 +14,8 @@ import {
   Briefcase,
   Home,
   Search,
-  Target
+  Target,
+  Brain
 } from 'lucide-react';
 
 const TabNavigation: React.FC = () => {
@@ -30,13 +31,13 @@ const TabNavigation: React.FC = () => {
           <Bell size={18} />
           <span className="hidden sm:inline">Meds</span>
         </TabsTrigger>
+        <TabsTrigger value="mood" className="flex items-center gap-2">
+          <Brain size={18} />
+          <span className="hidden sm:inline">Mood</span>
+        </TabsTrigger>
         <TabsTrigger value="search" className="flex items-center gap-2">
           <Search size={18} />
           <span className="hidden sm:inline">Search</span>
-        </TabsTrigger>
-        <TabsTrigger value="correlations" className="flex items-center gap-2">
-          <Target size={18} />
-          <span className="hidden sm:inline">Insights</span>
         </TabsTrigger>
       </TabsList>
 
@@ -74,6 +75,10 @@ const TabNavigation: React.FC = () => {
           <Bell size={18} />
           <span className="hidden sm:inline">Reminders</span>
         </TabsTrigger>
+        <TabsTrigger value="correlations" className="flex items-center gap-2">
+          <Target size={18} />
+          <span className="hidden sm:inline">Insights</span>
+        </TabsTrigger>
         <TabsTrigger value="analytics" className="flex items-center gap-2">
           <TrendingUp size={18} />
           <span className="hidden sm:inline">Analytics</span>
@@ -82,9 +87,13 @@ const TabNavigation: React.FC = () => {
           <Timer size={18} />
           <span className="hidden sm:inline">Timer</span>
         </TabsTrigger>
+      </TabsList>
+
+      {/* Edit Mode */}
+      <TabsList className="grid w-full grid-cols-1 mb-4">
         <TabsTrigger value="edit" className="flex items-center gap-2">
           <Edit size={18} />
-          <span className="hidden sm:inline">Edit</span>
+          <span className="hidden sm:inline">Edit Mode</span>
         </TabsTrigger>
       </TabsList>
     </div>

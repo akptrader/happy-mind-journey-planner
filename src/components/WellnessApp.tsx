@@ -15,6 +15,7 @@ import Dashboard from './Dashboard';
 import SearchAndFilter from './SearchAndFilter';
 import CustomReminders from './CustomReminders';
 import SymptomCorrelation from './SymptomCorrelation';
+import MoodTracker from './MoodTracker';
 import Header from './Header';
 import TabNavigation from './TabNavigation';
 import AppFooter from './AppFooter';
@@ -65,6 +66,10 @@ const WellnessApp = () => {
 
           <TabsContent value="health" className="animate-slide-in">
             <HealthMetrics />
+          </TabsContent>
+
+          <TabsContent value="mood" className="animate-slide-in">
+            <MoodTracker onBack={() => setActiveTab('dashboard')} />
           </TabsContent>
 
           <TabsContent value="timer" className="animate-slide-in">
