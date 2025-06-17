@@ -16,6 +16,10 @@ const config: CapacitorConfig = {
       sound: "beep.wav",
     },
   },
+  packageClassList: [
+    "LocalNotificationsPlugin",
+    "PushNotificationsPlugin"
+  ]
 };
 
 export default config;
