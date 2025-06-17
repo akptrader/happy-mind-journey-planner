@@ -6,6 +6,9 @@ const config: CapacitorConfig = {
   appName: 'WellnessHub',
   webDir: 'dist',
   bundledWebRuntime: false,
+  ios: {
+    scheme: 'WellnessHub'
+  },
   plugins: {
     LocalNotifications: {
       smallIcon: "ic_stat_icon_config_sample",
