@@ -3,11 +3,11 @@ import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'app.lovable.5b273ec913e846c782d7d479d19f4fcb',
-  appName: 'happy-mind-journey-planner',
+  appName: 'WellnessHub',
   webDir: 'dist',
   bundledWebRuntime: false,
   ios: {
-    scheme: 'happy-mind-journey-planner'
+    scheme: 'WellnessHub'
   },
   plugins: {
     LocalNotifications: {
