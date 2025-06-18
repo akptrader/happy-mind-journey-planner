@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,6 +18,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useDataMigration } from '@/hooks/useDataMigration';
+import TimingTimer from './TimingTimer';
 
 interface DashboardProps {
   onNavigate: (view: string) => void;
@@ -174,6 +176,9 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
           Your personal wellness companion - Now with cloud backup! ☁️
         </p>
       </div>
+
+      {/* Cobenfy Timer - Featured prominently */}
+      <TimingTimer />
 
       {/* Today's Progress */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
