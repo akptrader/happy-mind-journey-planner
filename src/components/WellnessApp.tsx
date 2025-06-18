@@ -23,23 +23,23 @@ const WellnessApp = () => {
   const renderView = () => {
     switch (currentView) {
       case 'medications':
-        return <MedicationTracker onBack={() => setCurrentView('dashboard')} />;
+        return <MedicationTracker />;
       case 'mood':
-        return <MoodTracker onBack={() => setCurrentView('dashboard')} />;
+        return <MoodTracker />;
       case 'health':
-        return <HealthMetrics onBack={() => setCurrentView('dashboard')} />;
+        return <HealthMetrics />;
       case 'analytics':
-        return <Analytics onBack={() => setCurrentView('dashboard')} />;
+        return <Analytics />;
       case 'checklist':
-        return <DailyChecklist onBack={() => setCurrentView('dashboard')} />;
+        return <DailyChecklist />;
       case 'exercise':
-        return <ExerciseTracker onBack={() => setCurrentView('dashboard')} />;
+        return <ExerciseTracker />;
       case 'diet':
-        return <DietTracker onBack={() => setCurrentView('dashboard')} />;
+        return <DietTracker />;
       case 'work':
-        return <WorkProductivityTracker onBack={() => setCurrentView('dashboard')} />;
+        return <WorkProductivityTracker />;
       case 'supplements':
-        return <SupplementTracker onBack={() => setCurrentView('dashboard')} />;
+        return <SupplementTracker />;
       case 'data-backup':
         return (
           <div className="space-y-4">
@@ -58,7 +58,7 @@ const WellnessApp = () => {
           </div>
         );
       default:
-        return <Dashboard onNavigate={setCurrentView} />;
+        return <Dashboard onNavigate={(view: string) => setCurrentView(view as View)} />;
     }
   };
 

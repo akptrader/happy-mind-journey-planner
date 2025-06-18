@@ -8,7 +8,7 @@ import { Download, Upload, Database, AlertTriangle } from 'lucide-react';
 
 const DataBackup = () => {
   const [backupData, setBackupData] = useState('');
-  const [importData, setImportData] = useState('');
+  const [importDataText, setImportDataText] = useState('');
   const { toast } = useToast();
 
   const getAllStoredData = () => {
@@ -70,9 +70,9 @@ const DataBackup = () => {
     });
   };
 
-  const importData = () => {
+  const handleImportData = () => {
     try {
-      const data = JSON.parse(importData);
+      const data = JSON.parse(importDataText);
       
       // Validate data structure
       const expectedKeys = [
@@ -226,8 +226,8 @@ const DataBackup = () => {
               Paste backup data here:
             </label>
             <Textarea
-              value={importData}
-              onChange={(e) => setImportData(e.target.value)}
+              value={importDataText}
+              onChange={(e) => setImportDataText(e.target.value)}
               placeholder="Paste your backup JSON data here..."
               className="font-mono text-xs"
               rows={8}
@@ -235,8 +235,8 @@ const DataBackup = () => {
           </div>
           
           <Button 
-            onClick={importData}
-            disabled={!importData.trim()}
+            onClick={handleImportData}
+            disabled={!importDataText.trim()}
             className="bg-green-600 text-white hover:bg-green-700"
           >
             <Upload size={16} className="mr-2" />
