@@ -2,7 +2,7 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.lovable.happymindjourney',
+  appId: 'app.lovable.5b273ec913e846c782d7d479d19f4fcb',
   appName: 'happy-mind-journey-planner',
   webDir: 'dist',
   bundledWebRuntime: false,
