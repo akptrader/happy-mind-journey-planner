@@ -6,6 +6,10 @@ const config: CapacitorConfig = {
   appName: 'happy-mind-journey-planner',
   webDir: 'dist',
   bundledWebRuntime: false,
+  server: {
+    url: "https://5b273ec9-13e8-46c7-82d7-d479d19f4fcb.lovableproject.com?forceHideBadge=true",
+    cleartext: true
+  },
   ios: {
     scheme: 'happy-mind-journey-planner'
   },
