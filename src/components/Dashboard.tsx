@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,12 +14,17 @@ import {
   Pill,
   Database
 } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useDataMigration } from '@/hooks/useDataMigration';
 
 interface DashboardProps {
   onNavigate: (view: string) => void;
 }
 
 const Dashboard = ({ onNavigate }: DashboardProps) => {
+  const { user } = useAuth();
+  const { migrationComplete } = useDataMigration();
   const [todayProgress, setTodayProgress] = useState({
     medications: 0,
     totalMedications: 0,
@@ -29,29 +33,51 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
   });
 
   useEffect(() => {
-    // Calculate today's progress
-    const today = new Date().toDateString();
-    
-    // Medication progress
-    const medications = JSON.parse(localStorage.getItem('medications') || '[]');
-    const medicationLog = JSON.parse(localStorage.getItem('medicationLog') || '[]');
-    const todayMedLogs = medicationLog.filter((log: any) => 
-      new Date(log.timestamp).toDateString() === today && log.taken
-    );
-    
-    // Checklist progress
-    const checklistItems = JSON.parse(localStorage.getItem('checklistItems') || '[]');
-    const completedToday = checklistItems.filter((item: any) => 
-      item.completed && new Date(item.completedAt || '').toDateString() === today
-    ).length;
+    if (!user || !migrationComplete) return;
 
-    setTodayProgress({
-      medications: todayMedLogs.length,
-      totalMedications: medications.length,
-      checklistItems: completedToday,
-      totalChecklistItems: checklistItems.length
-    });
-  }, []);
+    const calculateProgress = async () => {
+      try {
+        const today = new Date().toDateString();
+        
+        // Get medication progress from Supabase
+        const { data: medications } = await supabase
+          .from('medications')
+          .select('*')
+          .eq('user_id', user.id);
+        
+        const { data: takenMeds } = await supabase
+          .from('medications')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('taken', true)
+          .gte('taken_at', new Date(today).toISOString());
+
+        // Get checklist progress from Supabase
+        const { data: checklistItems } = await supabase
+          .from('checklist_items')
+          .select('*')
+          .eq('user_id', user.id);
+        
+        const { data: completedItems } = await supabase
+          .from('checklist_items')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('completed', true)
+          .gte('completed_at', new Date(today).toISOString());
+
+        setTodayProgress({
+          medications: takenMeds?.length || 0,
+          totalMedications: medications?.length || 0,
+          checklistItems: completedItems?.length || 0,
+          totalChecklistItems: checklistItems?.length || 0
+        });
+      } catch (error) {
+        console.error('Error calculating progress:', error);
+      }
+    };
+
+    calculateProgress();
+  }, [user, migrationComplete]);
 
   const quickActions = [
     {
@@ -145,7 +171,7 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
           Happy Mind Journey 🌟
         </h1>
         <p className="text-muted-foreground">
-          Your personal wellness companion
+          Your personal wellness companion - Now with cloud backup! ☁️
         </p>
       </div>
 
@@ -209,7 +235,7 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
       {/* Motivational Message */}
       <Card className="medication-card calm-gradient text-white text-center p-6">
         <p className="text-sm">
-          💙 Every step you take towards better health matters. You're doing great!
+          💙 Every step you take towards better health matters. Your data is now safely backed up in the cloud!
         </p>
       </Card>
     </div>

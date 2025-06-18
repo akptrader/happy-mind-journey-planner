@@ -1,9 +1,11 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Brain, TrendingUp, AlertTriangle, History, TrendingDown, Zap } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useDataMigration } from '@/hooks/useDataMigration';
 import AddMoodEntryDialog from './AddMoodEntryDialog';
 import MoodHistory from './MoodHistory';
 
@@ -22,32 +24,88 @@ interface MoodTrackerProps {
 }
 
 const MoodTracker = ({ onBack }: MoodTrackerProps) => {
+  const { user } = useAuth();
+  const { migrationComplete } = useDataMigration();
   const { toast } = useToast();
   const [addEntryOpen, setAddEntryOpen] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
-  
-  const [moodEntries, setMoodEntries] = useState<MoodEntry[]>(() => {
-    const saved = localStorage.getItem('moodEntries');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [moodEntries, setMoodEntries] = useState<MoodEntry[]>([]);
+  const [loading, setLoading] = useState(true);
 
+  // Load mood entries from Supabase
   useEffect(() => {
-    localStorage.setItem('moodEntries', JSON.stringify(moodEntries));
-  }, [moodEntries]);
+    if (!user || !migrationComplete) return;
 
-  const handleAddEntry = (entry: Omit<MoodEntry, 'id' | 'timestamp'>) => {
-    const newEntry: MoodEntry = {
-      ...entry,
-      id: Date.now().toString(),
-      timestamp: new Date().toISOString()
+    const loadMoodEntries = async () => {
+      try {
+        const { data: supabaseEntries, error } = await supabase
+          .from('mood_entries')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('timestamp', { ascending: false });
+
+        if (error) throw error;
+
+        // Transform Supabase data to local format
+        const transformedEntries = supabaseEntries?.map(entry => ({
+          id: entry.id,
+          timestamp: entry.timestamp,
+          moodLevel: entry.mood,
+          type: 'normal' as const,
+          notes: entry.notes || undefined
+        })) || [];
+
+        setMoodEntries(transformedEntries);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error loading mood entries:', error);
+        setLoading(false);
+      }
     };
-    setMoodEntries(prev => [newEntry, ...prev]);
-    setAddEntryOpen(false);
-    
-    toast({
-      title: "Mood entry logged! 🧠",
-      description: `${entry.type.replace('-', ' ')} recorded`,
-    });
+
+    loadMoodEntries();
+  }, [user, migrationComplete]);
+
+  const handleAddEntry = async (entry: Omit<MoodEntry, 'id' | 'timestamp'>) => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('mood_entries')
+        .insert({
+          user_id: user.id,
+          mood: entry.moodLevel,
+          notes: entry.notes || null,
+          timestamp: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const newEntry: MoodEntry = {
+        id: data.id,
+        timestamp: data.timestamp,
+        moodLevel: data.mood,
+        type: entry.type,
+        notes: data.notes || undefined
+      };
+
+      setMoodEntries(prev => [newEntry, ...prev]);
+      setAddEntryOpen(false);
+      
+      toast({
+        title: "Mood entry logged! 🧠",
+        description: `${entry.type.replace('-', ' ')} recorded and saved to cloud`,
+      });
+    } catch (error) {
+      console.error('Error adding mood entry:', error);
+      toast({
+        title: "Error logging mood",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    }
   };
 
   const getTypeIcon = (type: string) => {
@@ -94,6 +152,14 @@ const MoodTracker = ({ onBack }: MoodTrackerProps) => {
     if (level <= 7) return 'text-blue-400';
     return 'text-green-400';
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-white">Loading your mood entries...</div>
+      </div>
+    );
+  }
 
   if (showHistory) {
     return (
@@ -163,20 +229,9 @@ const MoodTracker = ({ onBack }: MoodTrackerProps) => {
                       <span className="text-sm text-muted-foreground">
                         {new Date(entry.timestamp).toLocaleTimeString()}
                       </span>
-                      {entry.severity && (
-                        <span className="text-xs bg-gray-600 text-gray-200 px-2 py-1 rounded">
-                          {entry.severity}
-                        </span>
-                      )}
                     </div>
                     {entry.notes && (
                       <p className="text-sm text-champagne ml-6">{entry.notes}</p>
-                    )}
-                    {entry.triggers && entry.triggers.length > 0 && (
-                      <div className="ml-6 mt-1">
-                        <span className="text-xs text-muted-foreground">Triggers: </span>
-                        <span className="text-xs text-gold">{entry.triggers.join(', ')}</span>
-                      </div>
                     )}
                   </div>
                 </div>
