@@ -15,10 +15,11 @@ import WorkProductivityTracker from './WorkProductivityTracker';
 import SupplementTracker from './SupplementTracker';
 import DataBackup from './DataBackup';
 import AuthPage from './AuthPage';
+import MobileNavigation from './MobileNavigation';
 import { Card } from '@/components/ui/card';
 import { ArrowLeft } from 'lucide-react';
 
-type View = 'dashboard' | 'medications' | 'mood' | 'health' | 'analytics' | 'checklist' | 'exercise' | 'diet' | 'work' | 'supplements' | 'data-backup';
+type View = 'dashboard' | 'medications' | 'mood' | 'health' | 'analytics' | 'checklist' | 'exercise' | 'diet' | 'work' | 'supplements' | 'data-backup' | 'search';
 
 const WellnessApp = () => {
   const [currentView, setCurrentView] = useState<View>('dashboard');
@@ -58,6 +59,26 @@ const WellnessApp = () => {
         return <WorkProductivityTracker />;
       case 'supplements':
         return <SupplementTracker onBack={() => setCurrentView('dashboard')} />;
+      case 'search':
+        return (
+          <div className="space-y-4">
+            <div className="flex items-center gap-4 mb-6">
+              <Button
+                onClick={() => setCurrentView('dashboard')}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft size={16} />
+                Back
+              </Button>
+              <h1 className="text-2xl font-bold text-white">Search & Filter</h1>
+            </div>
+            <Card className="p-6">
+              <p className="text-muted-foreground">Search functionality coming soon...</p>
+            </Card>
+          </div>
+        );
       case 'data-backup':
         return (
           <div className="space-y-4">
@@ -81,7 +102,7 @@ const WellnessApp = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700 pb-20">
       <div className="container mx-auto px-4 py-6 max-w-4xl">
         <div className="flex justify-between items-center mb-6">
           <div className="text-sm text-muted-foreground">
@@ -99,6 +120,12 @@ const WellnessApp = () => {
         </div>
         {renderView()}
       </div>
+      
+      {/* Mobile Navigation */}
+      <MobileNavigation 
+        currentView={currentView} 
+        onNavigate={setCurrentView}
+      />
     </div>
   );
 };
