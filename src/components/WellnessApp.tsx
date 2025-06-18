@@ -24,14 +24,16 @@ const WellnessApp = () => {
   const [currentView, setCurrentView] = useState<View>('dashboard');
   const { user, loading, signOut } = useAuth();
 
+  // Show loading state while checking authentication
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700 flex items-center justify-center">
-        <div className="text-white">Loading...</div>
+        <div className="text-white text-lg">Loading your wellness app...</div>
       </div>
     );
   }
 
+  // Show auth page if user is not logged in
   if (!user) {
     return <AuthPage />;
   }
