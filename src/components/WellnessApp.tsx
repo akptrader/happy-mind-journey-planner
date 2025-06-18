@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -23,9 +24,6 @@ const WellnessApp = () => {
   const [currentView, setCurrentView] = useState<View>('dashboard');
   const { user, loading, signOut } = useAuth();
 
-  console.log('WellnessApp - User:', user);
-  console.log('WellnessApp - Loading:', loading);
-
   // Show loading state while checking authentication
   if (loading) {
     return (
@@ -37,11 +35,8 @@ const WellnessApp = () => {
 
   // Show auth page if user is not logged in
   if (!user) {
-    console.log('No user found, showing AuthPage');
     return <AuthPage />;
   }
-
-  console.log('User authenticated, showing main app');
 
   const renderView = () => {
     switch (currentView) {
