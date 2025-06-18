@@ -25,7 +25,7 @@ const WellnessApp = () => {
       case 'medications':
         return <MedicationTracker />;
       case 'mood':
-        return <MoodTracker />;
+        return <MoodTracker onBack={() => setCurrentView('dashboard')} />;
       case 'health':
         return <HealthMetrics />;
       case 'analytics':
@@ -39,7 +39,7 @@ const WellnessApp = () => {
       case 'work':
         return <WorkProductivityTracker />;
       case 'supplements':
-        return <SupplementTracker />;
+        return <SupplementTracker onBack={() => setCurrentView('dashboard')} />;
       case 'data-backup':
         return (
           <div className="space-y-4">
