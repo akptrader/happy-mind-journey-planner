@@ -15,11 +15,7 @@ const config: CapacitorConfig = {
       iconColor: "#488AFF",
       sound: "beep.wav",
     },
-  },
-  packageClassList: [
-    "LocalNotificationsPlugin",
-    "PushNotificationsPlugin"
-  ]
+  }
 };
 
 export default config;
