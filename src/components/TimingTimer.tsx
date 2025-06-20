@@ -1,15 +1,65 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Timer, Clock, Utensils, Pill } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 type TimerState = 'idle' | 'waiting-for-cobenfy' | 'waiting-to-eat';
 
+interface TimingEntry {
+  id: string;
+  timestamp: string;
+  type: 'meal' | 'cobenfy';
+  notes?: string;
+}
+
 const TimingTimer = () => {
+  const { toast } = useToast();
+  const { user } = useAuth();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [state, setState] = useState<TimerState>('idle');
   const [lastMeal, setLastMeal] = useState<Date | null>(null);
   const [lastCobenfy, setLastCobenfy] = useState<Date | null>(null);
+  const [timingHistory, setTimingHistory] = useState<TimingEntry[]>([]);
+
+  // Load saved data on component mount
+  useEffect(() => {
+    const savedHistory = localStorage.getItem('timingHistory');
+    if (savedHistory) {
+      const history = JSON.parse(savedHistory);
+      setTimingHistory(history);
+      
+      // Find the most recent meal and cobenfy entries
+      const recentMeal = history.filter((entry: TimingEntry) => entry.type === 'meal').sort((a: TimingEntry, b: TimingEntry) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
+      const recentCobenfy = history.filter((entry: TimingEntry) => entry.type === 'cobenfy').sort((a: TimingEntry, b: TimingEntry) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
+      
+      if (recentMeal) {
+        setLastMeal(new Date(recentMeal.timestamp));
+      }
+      if (recentCobenfy) {
+        setLastCobenfy(new Date(recentCobenfy.timestamp));
+      }
+      
+      // Determine current state based on history
+      if (recentMeal && recentCobenfy) {
+        const mealTime = new Date(recentMeal.timestamp).getTime();
+        const cobenFyTime = new Date(recentCobenfy.timestamp).getTime();
+        
+        if (mealTime > cobenFyTime) {
+          setState('waiting-for-cobenfy');
+        } else {
+          setState('waiting-to-eat');
+        }
+      } else if (recentMeal) {
+        setState('waiting-for-cobenfy');
+      } else if (recentCobenfy) {
+        setState('waiting-to-eat');
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -17,6 +67,37 @@ const TimingTimer = () => {
     }, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  const saveTimingEntry = async (type: 'meal' | 'cobenfy') => {
+    const now = new Date();
+    const entry: TimingEntry = {
+      id: Date.now().toString(),
+      timestamp: now.toISOString(),
+      type,
+      notes: `${type === 'meal' ? 'Meal' : 'Cobenfy'} logged at ${now.toLocaleTimeString()}`
+    };
+
+    const newHistory = [entry, ...timingHistory];
+    setTimingHistory(newHistory);
+    localStorage.setItem('timingHistory', JSON.stringify(newHistory));
+
+    // Try to save to Supabase if user is logged in
+    if (user) {
+      try {
+        await supabase.from('diet_entries').insert({
+          user_id: user.id,
+          food_name: type === 'meal' ? 'Meal (Cobenfy timing)' : 'Cobenfy medication',
+          meal_type: type === 'meal' ? 'other' : 'medication',
+          timestamp: now.toISOString(),
+          calories: null
+        });
+      } catch (error) {
+        console.log('Could not save to Supabase:', error);
+      }
+    }
+
+    return entry;
+  };
 
   const formatTimeUntil = (targetTime: Date) => {
     const diff = targetTime.getTime() - currentTime.getTime();
@@ -29,34 +110,49 @@ const TimingTimer = () => {
     return `${hours}h ${minutes}m ${seconds}s`;
   };
 
-  const handleAte = () => {
+  const handleAte = async () => {
     const now = new Date();
+    await saveTimingEntry('meal');
     setLastMeal(now);
-    // If we have no Cobenfy time or can already take Cobenfy, go to waiting for Cobenfy
+    
     if (!lastCobenfy || canTakeCobenfy()) {
       setState('waiting-for-cobenfy');
     } else {
-      // Otherwise, determine state based on most recent action
       setState('waiting-to-eat');
     }
+
+    toast({
+      title: "Meal logged! 🍽️",
+      description: "Timing updated for Cobenfy schedule",
+    });
   };
 
-  const handleTookCobenfy = () => {
+  const handleTookCobenfy = async () => {
     const now = new Date();
+    await saveTimingEntry('cobenfy');
     setLastCobenfy(now);
-    // If we have no meal time or can already eat, go to waiting to eat
+    
     if (!lastMeal || canEat()) {
       setState('waiting-to-eat');
     } else {
-      // Otherwise, determine state based on most recent action
       setState('waiting-for-cobenfy');
     }
+
+    toast({
+      title: "Cobenfy logged! 💊",
+      description: "Timing updated for eating schedule",
+    });
   };
 
   const resetCycle = () => {
     setState('idle');
     setLastMeal(null);
     setLastCobenfy(null);
+    
+    toast({
+      title: "Cycle reset",
+      description: "Ready to start tracking again",
+    });
   };
 
   const canTakeCobenfy = () => {
@@ -73,12 +169,12 @@ const TimingTimer = () => {
 
   const getSafeCobenFyTime = () => {
     if (!lastMeal) return null;
-    return new Date(lastMeal.getTime() + 2 * 60 * 60 * 1000); // 2 hours after eating
+    return new Date(lastMeal.getTime() + 2 * 60 * 60 * 1000);
   };
 
   const getSafeEatTime = () => {
     if (!lastCobenfy) return null;
-    return new Date(lastCobenfy.getTime() + 1 * 60 * 60 * 1000); // 1 hour after Cobenfy
+    return new Date(lastCobenfy.getTime() + 1 * 60 * 60 * 1000);
   };
 
   const renderMainContent = () => {
@@ -223,6 +319,26 @@ const TimingTimer = () => {
           <p>💊 Take Cobenfy → ⏰ Wait 1+ hour → 🍽️ Eat</p>
         </div>
       </Card>
+
+      {/* Show recent history */}
+      {timingHistory.length > 0 && (
+        <Card className="medication-card bg-gray-800 p-4">
+          <h3 className="font-semibold mb-3 text-foreground">Recent Activity</h3>
+          <div className="space-y-2 max-h-32 overflow-y-auto">
+            {timingHistory.slice(0, 5).map((entry) => (
+              <div key={entry.id} className="flex items-center gap-2 text-sm">
+                <span className="text-lg">
+                  {entry.type === 'meal' ? '🍽️' : '💊'}
+                </span>
+                <span className="text-muted-foreground">
+                  {new Date(entry.timestamp).toLocaleString()}
+                </span>
+                <span className="text-champagne capitalize">{entry.type}</span>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
     </div>
   );
 };
