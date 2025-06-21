@@ -29,34 +29,48 @@ const TimingTimer = () => {
   useEffect(() => {
     const savedHistory = localStorage.getItem('timingHistory');
     if (savedHistory) {
-      const history = JSON.parse(savedHistory);
-      setTimingHistory(history);
-      
-      // Find the most recent meal and cobenfy entries
-      const recentMeal = history.filter((entry: TimingEntry) => entry.type === 'meal').sort((a: TimingEntry, b: TimingEntry) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
-      const recentCobenfy = history.filter((entry: TimingEntry) => entry.type === 'cobenfy').sort((a: TimingEntry, b: TimingEntry) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
-      
-      if (recentMeal) {
-        setLastMeal(new Date(recentMeal.timestamp));
-      }
-      if (recentCobenfy) {
-        setLastCobenfy(new Date(recentCobenfy.timestamp));
-      }
-      
-      // Determine current state based on history
-      if (recentMeal && recentCobenfy) {
-        const mealTime = new Date(recentMeal.timestamp).getTime();
-        const cobenFyTime = new Date(recentCobenfy.timestamp).getTime();
+      try {
+        const history = JSON.parse(savedHistory);
+        setTimingHistory(history);
         
-        if (mealTime > cobenFyTime) {
-          setState('waiting-for-cobenfy');
-        } else {
-          setState('waiting-to-eat');
+        // Find the most recent meal and cobenfy entries
+        const meals = history.filter((entry: TimingEntry) => entry.type === 'meal');
+        const cobenfyEntries = history.filter((entry: TimingEntry) => entry.type === 'cobenfy');
+        
+        const recentMeal = meals.length > 0 ? meals.sort((a: TimingEntry, b: TimingEntry) => 
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0] : null;
+        const recentCobenfy = cobenfyEntries.length > 0 ? cobenfyEntries.sort((a: TimingEntry, b: TimingEntry) => 
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0] : null;
+        
+        if (recentMeal) {
+          setLastMeal(new Date(recentMeal.timestamp));
         }
-      } else if (recentMeal) {
-        setState('waiting-for-cobenfy');
-      } else if (recentCobenfy) {
-        setState('waiting-to-eat');
+        if (recentCobenfy) {
+          setLastCobenfy(new Date(recentCobenfy.timestamp));
+        }
+        
+        // Determine current state based on history
+        if (recentMeal && recentCobenfy) {
+          const mealTime = new Date(recentMeal.timestamp).getTime();
+          const cobenFyTime = new Date(recentCobenfy.timestamp).getTime();
+          
+          if (mealTime > cobenFyTime) {
+            // Last action was eating, wait for cobenfy
+            setState('waiting-for-cobenfy');
+          } else {
+            // Last action was cobenfy, wait to eat
+            setState('waiting-to-eat');
+          }
+        } else if (recentMeal && !recentCobenfy) {
+          setState('waiting-for-cobenfy');
+        } else if (!recentMeal && recentCobenfy) {
+          setState('waiting-to-eat');
+        } else {
+          setState('idle');
+        }
+      } catch (error) {
+        console.error('Error loading timing history:', error);
+        setState('idle');
       }
     }
   }, []);
@@ -114,16 +128,11 @@ const TimingTimer = () => {
     const now = new Date();
     await saveTimingEntry('meal');
     setLastMeal(now);
-    
-    if (!lastCobenfy || canTakeCobenfy()) {
-      setState('waiting-for-cobenfy');
-    } else {
-      setState('waiting-to-eat');
-    }
+    setState('waiting-for-cobenfy');
 
     toast({
       title: "Meal logged! 🍽️",
-      description: "Timing updated for Cobenfy schedule",
+      description: "Wait 2+ hours before taking Cobenfy",
     });
   };
 
@@ -131,16 +140,11 @@ const TimingTimer = () => {
     const now = new Date();
     await saveTimingEntry('cobenfy');
     setLastCobenfy(now);
-    
-    if (!lastMeal || canEat()) {
-      setState('waiting-to-eat');
-    } else {
-      setState('waiting-for-cobenfy');
-    }
+    setState('waiting-to-eat');
 
     toast({
       title: "Cobenfy logged! 💊",
-      description: "Timing updated for eating schedule",
+      description: "Wait 1+ hour before eating",
     });
   };
 
