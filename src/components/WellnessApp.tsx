@@ -39,65 +39,89 @@ const WellnessApp = () => {
     return <AuthPage />;
   }
 
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
   const renderView = () => {
-    switch (currentView) {
-      case 'medications':
-        return <MedicationTracker />;
-      case 'mood':
-        return <MoodTracker onBack={() => setCurrentView('dashboard')} />;
-      case 'health':
-        return <HealthMetrics />;
-      case 'analytics':
-        return <Analytics />;
-      case 'checklist':
-        return <DailyChecklist />;
-      case 'exercise':
-        return <ExerciseTracker />;
-      case 'diet':
-        return <DietTracker />;
-      case 'work':
-        return <WorkProductivityTracker />;
-      case 'supplements':
-        return <SupplementTracker onBack={() => setCurrentView('dashboard')} />;
-      case 'search':
-        return (
-          <div className="space-y-4">
-            <div className="flex items-center gap-4 mb-6">
-              <Button
-                onClick={() => setCurrentView('dashboard')}
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-2"
-              >
-                <ArrowLeft size={16} />
-                Back
-              </Button>
-              <h1 className="text-2xl font-bold text-white">Search & Filter</h1>
+    try {
+      switch (currentView) {
+        case 'medications':
+          return <MedicationTracker />;
+        case 'mood':
+          return <MoodTracker onBack={() => setCurrentView('dashboard')} />;
+        case 'health':
+          return <HealthMetrics />;
+        case 'analytics':
+          return <Analytics />;
+        case 'checklist':
+          return <DailyChecklist />;
+        case 'exercise':
+          return <ExerciseTracker />;
+        case 'diet':
+          return <DietTracker />;
+        case 'work':
+          return <WorkProductivityTracker />;
+        case 'supplements':
+          return <SupplementTracker onBack={() => setCurrentView('dashboard')} />;
+        case 'search':
+          return (
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 mb-6">
+                <Button
+                  onClick={() => setCurrentView('dashboard')}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <ArrowLeft size={16} />
+                  Back
+                </Button>
+                <h1 className="text-2xl font-bold text-white">Search & Filter</h1>
+              </div>
+              <Card className="p-6">
+                <p className="text-muted-foreground">Search functionality coming soon...</p>
+              </Card>
             </div>
-            <Card className="p-6">
-              <p className="text-muted-foreground">Search functionality coming soon...</p>
-            </Card>
-          </div>
-        );
-      case 'data-backup':
-        return (
-          <div className="space-y-4">
-            <div className="flex items-center gap-4 mb-6">
-              <Button
-                onClick={() => setCurrentView('dashboard')}
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-2"
-              >
-                <ArrowLeft size={16} />
-                Back to Dashboard
-              </Button>
+          );
+        case 'data-backup':
+          return (
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 mb-6">
+                <Button
+                  onClick={() => setCurrentView('dashboard')}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <ArrowLeft size={16} />
+                  Back to Dashboard
+                </Button>
+              </div>
+              <DataBackup />
             </div>
-            <DataBackup />
-          </div>
-        );
-      default:
-        return <Dashboard onNavigate={(view: string) => setCurrentView(view as View)} />;
+          );
+        default:
+          return <Dashboard onNavigate={(view: string) => setCurrentView(view as View)} />;
+      }
+    } catch (error) {
+      console.error('Error rendering view:', error);
+      return (
+        <Card className="p-6">
+          <p className="text-red-400">Error loading this section. Please try refreshing the page.</p>
+          <Button 
+            onClick={() => setCurrentView('dashboard')} 
+            className="mt-4"
+            variant="outline"
+          >
+            Return to Dashboard
+          </Button>
+        </Card>
+      );
     }
   };
 
@@ -109,7 +133,7 @@ const WellnessApp = () => {
             Welcome back, {user.email}
           </div>
           <Button
-            onClick={signOut}
+            onClick={handleSignOut}
             variant="outline"
             size="sm"
             className="flex items-center gap-2"
