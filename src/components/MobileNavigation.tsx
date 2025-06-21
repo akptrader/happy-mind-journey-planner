@@ -28,21 +28,21 @@ interface MobileNavigationProps {
 
 const MobileNavigation: React.FC<MobileNavigationProps> = ({ currentView, onNavigate }) => {
   const primaryTabs = [
-    { id: 'dashboard' as View, icon: Home, label: 'Home' },
-    { id: 'medications' as View, icon: Bell, label: 'Meds' },
-    { id: 'mood' as View, icon: Brain, label: 'Mood' },
-    { id: 'search' as View, icon: Search, label: 'Search' },
+    { id: 'dashboard' as const, icon: Home, label: 'Home' },
+    { id: 'medications' as const, icon: Bell, label: 'Meds' },
+    { id: 'mood' as const, icon: Brain, label: 'Mood' },
+    { id: 'search' as const, icon: Search, label: 'Search' },
   ];
 
   const secondaryTabs = [
-    { id: 'health' as View, label: 'Health Metrics' },
-    { id: 'exercise' as View, label: 'Exercise' },
-    { id: 'diet' as View, label: 'Diet' },
-    { id: 'work' as View, label: 'Work' },
-    { id: 'checklist' as View, label: 'Daily Tasks' },
-    { id: 'supplements' as View, label: 'Supplements' },
-    { id: 'analytics' as View, label: 'Analytics' },
-    { id: 'data-backup' as View, label: 'Data Backup' },
+    { id: 'health' as const, label: 'Health Metrics' },
+    { id: 'exercise' as const, label: 'Exercise' },
+    { id: 'diet' as const, label: 'Diet' },
+    { id: 'work' as const, label: 'Work' },
+    { id: 'checklist' as const, label: 'Daily Tasks' },
+    { id: 'supplements' as const, label: 'Supplements' },
+    { id: 'analytics' as const, label: 'Analytics' },
+    { id: 'data-backup' as const, label: 'Data Backup' },
   ];
 
   return (

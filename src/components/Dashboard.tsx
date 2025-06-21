@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -39,33 +38,53 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
 
     const calculateProgress = async () => {
       try {
-        const today = new Date().toDateString();
+        const today = new Date();
+        const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString();
+        const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).toISOString();
         
         // Get medication progress from Supabase
-        const { data: medications } = await supabase
+        const { data: medications, error: medError } = await supabase
           .from('medications')
           .select('*')
           .eq('user_id', user.id);
         
-        const { data: takenMeds } = await supabase
+        if (medError) {
+          console.error('Error fetching medications:', medError);
+        }
+
+        const { data: takenMeds, error: takenError } = await supabase
           .from('medications')
           .select('*')
           .eq('user_id', user.id)
           .eq('taken', true)
-          .gte('taken_at', new Date(today).toISOString());
+          .gte('taken_at', startOfDay)
+          .lt('taken_at', endOfDay);
+
+        if (takenError) {
+          console.error('Error fetching taken medications:', takenError);
+        }
 
         // Get checklist progress from Supabase
-        const { data: checklistItems } = await supabase
+        const { data: checklistItems, error: checklistError } = await supabase
           .from('checklist_items')
           .select('*')
           .eq('user_id', user.id);
         
-        const { data: completedItems } = await supabase
+        if (checklistError) {
+          console.error('Error fetching checklist items:', checklistError);
+        }
+
+        const { data: completedItems, error: completedError } = await supabase
           .from('checklist_items')
           .select('*')
           .eq('user_id', user.id)
           .eq('completed', true)
-          .gte('completed_at', new Date(today).toISOString());
+          .gte('completed_at', startOfDay)
+          .lt('completed_at', endOfDay);
+
+        if (completedError) {
+          console.error('Error fetching completed items:', completedError);
+        }
 
         setTodayProgress({
           medications: takenMeds?.length || 0,
